@@ -1,7 +1,9 @@
 #include <vector>
 #include <cmath>
+#include <tuple>
 #include <limits>
 #include <string>
+#include <utility>
 #include <numeric>
 #include <algorithm>
 #include "pc.h"
@@ -454,4 +456,369 @@ Rcpp::DataFrame RcppPCboot(
             Rcpp::Named("q95") = df_q95
         );
     }
+}
+
+/**
+ * Select optimal embedding parameters (E k tau) for pattern causality metrics
+ * using a global scan and full tie tracking across three causality measures.
+ *
+ * The input matrix must contain six columns in the following order:
+ *   1. E      embedding dimension
+ *   2. k      number of nearest neighbors
+ *   3. tau    lag parameter
+ *   4. pos    positive causality score
+ *   5. neg    negative causality score
+ *   6. dark   dark causality score
+ *
+ * The argument `maximize` specifies which causality metric should be given
+ * primary priority. The three metrics are compared in a hierarchical order:
+ *
+ *   maximize = "positive":  pos then dark then neg
+ *   maximize = "negative":  neg then dark then pos
+ *   maximize = "dark":      dark then pos then neg
+ *
+ * The function performs a single pass global scan. During the scan it collects
+ * all rows that achieve the joint optimum across the three prioritized metrics
+ * within numerical tolerance. When multiple rows tie for the optimum a final
+ * deterministic choice is made by selecting the smallest E then the smallest
+ * tau then the smallest k. A warning is issued when this final tie breaking
+ * procedure is required.
+ *
+ * @param Emat A numeric matrix with columns: E k tau pos neg dark.
+ * @param maximize A string specifying which metric to prioritize.
+ * @return IntegerVector containing E k tau in this order.
+ */
+Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
+                              const std::string& maximize = "positive") {
+
+  if (Emat.ncol() != 6) {
+    Rcpp::stop("Input matrix must have exactly six columns: E k tau pos neg dark.");
+  }
+  int n = Emat.nrow();
+  if (n == 0) {
+    Rcpp::stop("Input matrix must not be empty.");
+  }
+
+  if (maximize != "positive" && maximize != "negative" && maximize != "dark") {
+    Rcpp::stop("maximize must be one of positive negative or dark.");
+  }
+
+  // establish metric priority order
+  std::vector<int> priority(3);
+  if (maximize == "positive") {
+    priority = {3, 5, 4};  // pos dark neg
+  } else if (maximize == "negative") {
+    priority = {4, 5, 3};  // neg dark pos
+  } else {
+    priority = {5, 3, 4};  // dark pos neg
+  }
+
+  // helper to get metric value
+  auto get_metric = [&](int row, int idx) {
+    return Emat(row, idx);
+  };
+
+  // record of the best metrics for comparison
+  std::vector<double> best_vals(3);
+  for (int j = 0; j < 3; ++j) {
+    best_vals[j] = get_metric(0, priority[j]);
+  }
+
+  std::vector<int> best_rows;
+  best_rows.push_back(0);
+
+  // global scan
+  for (int i = 1; i < n; ++i) {
+
+    bool better = false;
+    bool equal_all = true;
+
+    for (int p = 0; p < 3; ++p) {
+      double a = get_metric(i, priority[p]);
+      double b = best_vals[p];
+
+      if (!pc::numericutils::doubleNearlyEqual(a, b)) {
+        if (a > b) {
+          better = true;
+        }
+        equal_all = false;
+        break;
+      }
+    }
+
+    if (better) {
+      best_rows.clear();
+      best_rows.push_back(i);
+      for (int p = 0; p < 3; ++p) {
+        best_vals[p] = get_metric(i, priority[p]);
+      }
+    }
+    else if (equal_all) {
+      best_rows.push_back(i);
+    }
+  }
+
+  // if only one globally optimal row return directly
+  if (best_rows.size() == 1) {
+    int row = best_rows[0];
+    return Rcpp::IntegerVector::create(
+      static_cast<int>(Emat(row, 0)),
+      static_cast<int>(Emat(row, 1)),
+      static_cast<int>(Emat(row, 2))
+    );
+  }
+
+  // issue tie warning
+  Rcpp::warning("Multiple parameter sets share the global optimum. The final choice is determined by smallest E then tau then k.");
+
+  // tie break by E then tau then k
+  int best_idx = best_rows[0];
+  int bestE = Emat(best_idx, 0);
+  int bestTau = Emat(best_idx, 2);
+  int bestK = Emat(best_idx, 1);
+
+  for (int idx : best_rows) {
+    int E = Emat(idx, 0);
+    int tau = Emat(idx, 2);
+    int k = Emat(idx, 1);
+
+    bool better =
+      (E < bestE) ||
+      (E == bestE && tau < bestTau) ||
+      (E == bestE && tau == bestTau && k < bestK);
+
+    if (better) {
+      best_idx = idx;
+      bestE = E;
+      bestTau = tau;
+      bestK = k;
+    }
+  }
+
+  return Rcpp::IntegerVector::create(bestE, bestK, bestTau);
+}
+
+// Wrapper function to perform optimal parameters search for pattern causality analysis
+// [[Rcpp::export(rng = false)]]
+Rcpp::List RcppPCops(
+    const Rcpp::NumericVector& target,
+    const Rcpp::NumericVector& source,
+    const Rcpp::IntegerVector& lib,
+    const Rcpp::IntegerVector& pred,
+    const Rcpp::IntegerVector& E,
+    const Rcpp::IntegerVector& tau,
+    const Rcpp::IntegerVector& k,
+    const std::string& maximize = "positive",
+    int style = 0,
+    int zero_tolerance = 0,
+    const std::string& dist_metric = "euclidean",
+    bool relative = true,
+    bool weighted = true,
+    int threads = 1,
+    int parallel_level = 0,
+    int h = 0,
+    Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
+    Rcpp::Nullable<int> nrows = R_NilValue)
+{
+    // --- Input Conversion and Validation --------------------------------------
+
+    std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
+    std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
+    const size_t n_obs = tg.size();
+
+    // Convert library indices (R 1-based → C++ 0-based)
+    std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
+    for (auto& idx : lib_std) 
+    {
+        if (idx < 1 || idx > n_obs) {
+            Rcpp::stop("lib index %d out of bounds [1, %d]",
+                       static_cast<int>(idx),
+                       static_cast<int>(n_obs));
+        }
+        idx -= 1;
+    }
+
+    // Convert prediction indices (R 1-based → C++ 0-based)
+    std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
+    for (auto& idx : pred_std) 
+    {
+        if (idx < 1 || idx > n_obs) {
+            Rcpp::stop("pred index %d out of bounds [1, %d]",
+                       static_cast<int>(idx),
+                       static_cast<int>(n_obs));
+        }
+        idx -= 1;
+    }
+
+    // Unique sorted embedding dimensions, neighbor values, and tau values
+    std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
+    std::sort(Es.begin(), Es.end());
+    Es.erase(std::unique(Es.begin(), Es.end()), Es.end());
+
+    std::vector<size_t> ks = Rcpp::as<std::vector<size_t>>(k);
+    std::sort(ks.begin(), ks.end());
+    ks.erase(std::unique(ks.begin(), ks.end()), ks.end());
+
+    std::vector<size_t> taus = Rcpp::as<std::vector<size_t>>(tau);
+    std::sort(taus.begin(), taus.end());
+    taus.erase(std::unique(taus.begin(), taus.end()), taus.end());
+
+    // Generate unique (E, b, tau) combinations
+    std::vector<std::tuple<size_t, size_t, size_t>> unique_EkTau;
+    for (size_t ee : Es)
+        for (size_t kk : ks)
+        for (size_t tt : taus)
+            unique_EkTau.emplace_back(ee, kk, tt);
+
+    // Process necessay data
+    std::vector<std::vector<size_t>> nb_std;
+    std::vector<std::vector<double>> tm;
+    std::vector<std::vector<double>> sm;
+    if (nb.isNotNull()) 
+    {   
+        // Convert Rcpp::List to std::vector<std::vector<size_t>>
+        nb_std = pc::convert::nb2std(nb.get());
+    }
+    else if (nrows.isNotNull())
+    {
+        size_t n_rows = static_cast<size_t>(std::abs(Rcpp::as<int>(nrows)));
+        tm = pc::embed::gridVec2Mat(tg, n_rows);
+        sm = pc::embed::gridVec2Mat(sg, n_rows);
+    }
+    else  
+    {
+        size_t max_E = *std::max_element(Es.begin(), Es.end());
+        size_t max_tau = *std::max_element(taus.begin(), taus.end());
+        size_t max_lag = (max_tau == 0) 
+            ? (max_E - 1)
+            : ((max_E - 1) * max_tau);
+
+        lib_std.erase(
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+                lib_std.end()
+        );
+
+        pred_std.erase(
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+                    pred_std.end()
+        );
+    }
+    
+    // --- Perform Pattern Causality Analysis -------------------------
+    std::vector<std::vector<double>> result(unique_EkTau.size(), std::vector<double>(6));
+
+    if (parallel_level == 0) {
+        for (size_t i = 0; i < unique_EkTau.size(); ++i) {
+            const size_t Ei   = std::get<0>(unique_EkTau[i]);
+            const size_t ki   = std::get<1>(unique_EkTau[i]);
+            const size_t taui = std::get<2>(unique_EkTau[i]);
+            // auto [Ei, ki, taui] = unique_EkTau[i]; // C++17 structured binding
+
+            // --- Embedding Construction ------------------------------------------------
+            std::vector<std::vector<double>> Mx;
+            std::vector<std::vector<double>> My;
+
+            if (nb.isNotNull()) 
+            {
+                Mx = pc::embed::embed(
+                    tg, nb_std, Ei, taui, static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, nb_std, Ei, taui, static_cast<size_t>(std::abs(style)));
+            } 
+            else if (nrows.isNotNull())
+            {   
+                Mx = pc::embed::embed(
+                    tm, Ei, taui, static_cast<size_t>(std::abs(style)));
+
+                My = pc::embed::embed(
+                    sm, Ei, taui, static_cast<size_t>(std::abs(style)));
+            }
+            else  
+            {
+                Mx = pc::embed::embed(
+                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, Ei, taui, static_cast<size_t>(std::abs(style)));
+            }
+
+            pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
+                Mx, My, lib_std, pred_std, ki,
+                static_cast<size_t>(std::abs(zero_tolerance)),
+                static_cast<size_t>(std::abs(h)),
+                dist_metric, relative, weighted,
+                static_cast<size_t>(std::abs(threads)));
+
+            result[i][0] = Ei;
+            result[i][1] = ki;
+            result[i][2] = taui;
+            result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+            result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+            result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+        }
+    } else {
+        // Configure threads
+        size_t threads_sizet = static_cast<size_t>(std::abs(threads));
+        threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
+
+        RcppThread::parallelFor(0, unique_EkTau.size(), [&](size_t i) {
+            const size_t Ei   = std::get<0>(unique_EkTau[i]);
+            const size_t ki   = std::get<1>(unique_EkTau[i]);
+            const size_t taui = std::get<2>(unique_EkTau[i]);
+            // auto [Ei, ki, taui] = unique_EkTau[i]; // C++17 structured binding
+
+            // --- Embedding Construction ------------------------------------------------
+            std::vector<std::vector<double>> Mx;
+            std::vector<std::vector<double>> My;
+
+            if (nb.isNotNull()) 
+            {
+                Mx = pc::embed::embed(
+                    tg, nb_std, Ei, taui, static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, nb_std, Ei, taui, static_cast<size_t>(std::abs(style)));
+            } 
+            else if (nrows.isNotNull())
+            {   
+                Mx = pc::embed::embed(
+                    tm, Ei, taui, static_cast<size_t>(std::abs(style)));
+
+                My = pc::embed::embed(
+                    sm, Ei, taui, static_cast<size_t>(std::abs(style)));
+            }
+            else  
+            {
+                Mx = pc::embed::embed(
+                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, Ei, taui, static_cast<size_t>(std::abs(style)));
+            }
+
+            pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
+                Mx, My, lib_std, pred_std, ki,
+                static_cast<size_t>(std::abs(zero_tolerance)),
+                static_cast<size_t>(std::abs(h)),
+                dist_metric, relative, weighted, 1);
+
+            result[i][0] = Ei;
+            result[i][1] = ki;
+            result[i][2] = taui;
+            result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+            result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+            result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+            }, threads_sizet);
+    }
+    
+    // --- Convert performance matrix to r--------------------------
+    Rcpp::NumericMatrix pmat = pc::convert::mat_std2r(result, true);
+    // --- Select optimal parameters ---------------------
+    Rcpp::IntegerVector pvec = OptPCparm(pmat, maximize);
+
+    // --- Return structured results --------------------------------------------
+
+    return Rcpp::List::create(
+        Rcpp::Named("param") = pvec,
+        Rcpp::Named("detail") = pmat
+    );
 }

@@ -68,10 +68,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// RcppPCops
+Rcpp::List RcppPCops(const Rcpp::NumericVector& target, const Rcpp::NumericVector& source, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, const Rcpp::IntegerVector& k, const std::string& maximize, int style, int zero_tolerance, const std::string& dist_metric, bool relative, bool weighted, int threads, int parallel_level, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows);
+RcppExport SEXP _pc_RcppPCops(SEXP targetSEXP, SEXP sourceSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP kSEXP, SEXP maximizeSEXP, SEXP styleSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP parallel_levelSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type source(sourceSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type lib(libSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type pred(predSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type E(ESEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type maximize(maximizeSEXP);
+    Rcpp::traits::input_parameter< int >::type style(styleSEXP);
+    Rcpp::traits::input_parameter< int >::type zero_tolerance(zero_toleranceSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type dist_metric(dist_metricSEXP);
+    Rcpp::traits::input_parameter< bool >::type relative(relativeSEXP);
+    Rcpp::traits::input_parameter< bool >::type weighted(weightedSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    Rcpp::traits::input_parameter< int >::type parallel_level(parallel_levelSEXP);
+    Rcpp::traits::input_parameter< int >::type h(hSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type nb(nbSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type nrows(nrowsSEXP);
+    rcpp_result_gen = Rcpp::wrap(RcppPCops(target, source, lib, pred, E, tau, k, maximize, style, zero_tolerance, dist_metric, relative, weighted, threads, parallel_level, h, nb, nrows));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pc_RcppPC", (DL_FUNC) &_pc_RcppPC, 16},
     {"_pc_RcppPCboot", (DL_FUNC) &_pc_RcppPCboot, 22},
+    {"_pc_RcppPCops", (DL_FUNC) &_pc_RcppPCops, 18},
     {NULL, NULL, 0}
 };
 

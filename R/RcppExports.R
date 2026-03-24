@@ -9,3 +9,7 @@ RcppPCboot <- function(target, source, libsizes, lib, pred, E, tau, style = 0L, 
     .Call(`_pc_RcppPCboot`, target, source, libsizes, lib, pred, E, tau, style, num_neighbors, zero_tolerance, dist_metric, boot, random_sample, seed, relative, weighted, threads, parallel_level, verbose, h, nb, nrows)
 }
 
+RcppPCops <- function(target, source, lib, pred, E, tau, k, maximize = "positive", style = 0L, zero_tolerance = 0L, dist_metric = "euclidean", relative = TRUE, weighted = TRUE, threads = 1L, parallel_level = 0L, h = 0L, nb = NULL, nrows = NULL) {
+    .Call(`_pc_RcppPCops`, target, source, lib, pred, E, tau, k, maximize, style, zero_tolerance, dist_metric, relative, weighted, threads, parallel_level, h, nb, nrows)
+}
+

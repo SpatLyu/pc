@@ -633,6 +633,9 @@ namespace symdync
          * 7. Normalize + aggregate
          * ------------------------------------------------------------ */
         std::vector<double> diag_vals, anti_vals, other_vals;
+        diag_vals.reserve(K);
+        anti_vals.reserve(K);
+        other_vals.reserve((K - 2) * K);
 
         for (size_t i = 0; i < K; ++i)
         {
