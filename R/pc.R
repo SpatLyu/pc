@@ -66,12 +66,12 @@
 #' @param k (optional) Number of nearest neighbors used for projection.
 #' @param tau (optional) Step of lag.
 #' @param style (optional) Embedding style (`0` includes current state, `1` excludes it).
-#' @param lib (optional) Libraries indices (input requirement same as `libsizes`).
-#' @param pred (optional) Predictions indices (input requirement same as `libsizes`).
+#' @param lib (optional) Libraries indices.
+#' @param pred (optional) Predictions indices.
 #' @param boot (optional) Number of bootstraps to perform.
 #' @param random (optional) Whether to use random sampling.
 #' @param seed (optional) Random seed.
-#' @param dist.metric (optional) Distance measure to be used
+#' @param dist.metric (optional) Distance measure to be used.
 #' @param zero.tolerance (optional) Maximum number of zeros tolerated in signature space.
 #' @param relative (optional) Whether to calculate relative changes in embedding.
 #' @param weighted (optional) Whether to weight causal strength.

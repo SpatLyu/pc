@@ -119,6 +119,24 @@ Rcpp::List RcppPC(
             tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
         My = pc::embed::embed(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+
+        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
+        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
+        size_t max_lag = (max_tau == 0) 
+            ? (max_E - 1)
+            : ((max_E - 1) * max_tau);
+
+        lib_std.erase(
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            lib_std.end()
+        );
+
+        pred_std.erase(
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            pred_std.end()
+        );
     }
 
     // --- Perform Pattern Causality Analysis -------------------------
@@ -198,7 +216,7 @@ Rcpp::DataFrame RcppPCboot(
     const std::string& dist_metric = "euclidean",
     int boot = 99,
     bool random_sample = true,
-    unsigned long long seed = 42,
+    int seed = 42,
     bool relative = true,
     bool weighted = true,
     int threads = 1,
@@ -236,23 +254,6 @@ Rcpp::DataFrame RcppPCboot(
                        static_cast<int>(n_obs));
         }
         idx -= 1;
-    }
-
-    // Validate and preprocess library sizes
-    std::vector<size_t> libsizes_std = Rcpp::as<std::vector<size_t>>(libsizes);
-    std::vector<size_t> valid_libsizes;
-    valid_libsizes.reserve(libsizes_std.size());
-    for (size_t s : libsizes_std) {
-        if (s > static_cast<size_t>(std::abs(num_neighbors)) && s <= lib_std.size())
-        valid_libsizes.push_back(s);
-    }
-
-    std::sort(valid_libsizes.begin(), valid_libsizes.end());
-    valid_libsizes.erase(std::unique(valid_libsizes.begin(), valid_libsizes.end()), valid_libsizes.end());
-
-    if (valid_libsizes.empty()) {
-        Rcpp::warning("[Warning] No valid libsizes after filtering. Using full library size as fallback.");
-        valid_libsizes.push_back(lib_std.size());
     }
 
     // Convert Rcpp IntegerVector to std::vector<size_t>
@@ -318,6 +319,41 @@ Rcpp::DataFrame RcppPCboot(
             tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
         My = pc::embed::embed(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+
+        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
+        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
+        size_t max_lag = (max_tau == 0) 
+            ? (max_E - 1)
+            : ((max_E - 1) * max_tau);
+
+        lib_std.erase(
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            lib_std.end()
+        );
+
+        pred_std.erase(
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            pred_std.end()
+        );
+    }
+
+    // Validate and preprocess library sizes
+    std::vector<size_t> libsizes_std = Rcpp::as<std::vector<size_t>>(libsizes);
+    std::vector<size_t> valid_libsizes;
+    valid_libsizes.reserve(libsizes_std.size());
+    for (size_t s : libsizes_std) {
+        if (s > static_cast<size_t>(std::abs(num_neighbors)) && s <= lib_std.size())
+        valid_libsizes.push_back(s);
+    }
+
+    std::sort(valid_libsizes.begin(), valid_libsizes.end());
+    valid_libsizes.erase(std::unique(valid_libsizes.begin(), valid_libsizes.end()), valid_libsizes.end());
+
+    if (valid_libsizes.empty()) {
+        Rcpp::warning("[Warning] No valid libsizes after filtering. Using full library size as fallback.");
+        valid_libsizes.push_back(lib_std.size());
     }
 
     // --- Perform Bootstrapped Pattern Causality Analysis -------------------------
@@ -326,11 +362,10 @@ Rcpp::DataFrame RcppPCboot(
         static_cast<size_t>(std::abs(num_neighbors)),
         static_cast<size_t>(std::abs(zero_tolerance)),
         static_cast<size_t>(std::abs(h)), dist_metric, 
-        static_cast<size_t>(std::abs(boot)),
-        random_sample, relative, weighted,
-        static_cast<size_t>(std::abs(threads)),
-        static_cast<size_t>(std::abs(parallel_level)),
-        verbose);
+        static_cast<size_t>(std::abs(boot)), random_sample, 
+        static_cast<unsigned long long>(std::abs(seed)),
+        relative, weighted, static_cast<size_t>(std::abs(threads)),
+        static_cast<size_t>(std::abs(parallel_level)), verbose);
 
     // --- Result Processing -----------------------------------------------------
 

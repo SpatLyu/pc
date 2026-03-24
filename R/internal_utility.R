@@ -7,9 +7,14 @@
     mat = as.matrix(data)
   }
 
-  res = vector("list", 4)
-  res[[1]] = mat[, target, drop = TRUE]
-  res[[2]] = mat[, source, drop = TRUE]
+  if (!(typeof(mat) %in% c("integer", "double"))) {
+    stop("Non-numeric values detected in input data. 
+          Please remove columns such as dates, characters, or factors.", call. = FALSE)
+  }
+
+  res = vector("list", 2)
+  res[[1]] = mat[, abs(target[1]), drop = TRUE]
+  res[[2]] = mat[, abs(source[1]), drop = TRUE]
   
   return(res)
 }
