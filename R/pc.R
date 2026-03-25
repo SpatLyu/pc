@@ -81,7 +81,12 @@
 #' @param nb (optional) Neighbours list.
 #' @param h (optional) Prediction horizon.
 #'
-#' @return A list (if `libsizes` is `NULL`) or dataframe.
+#' @return A list (when `libsizes` is `NULL`) or dataframe.
+#' If `libsizes` is `NULL`, a list with two components is returned:
+#' \describe{
+#'   \item{causality}{A data.frame containing per-sample causality results.}
+#'   \item{summary}{A data.frame summarizing overall causality metrics.}
+#' }
 #'
 #' @export
 #' @name pc

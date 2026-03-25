@@ -196,10 +196,13 @@ Rcpp::List RcppPC(
 
     // --- Return structured results --------------------------------------------
 
-    return Rcpp::List::create(
+    Rcpp::List out = Rcpp::List::create(
         Rcpp::Named("causality") = causality_df,
         Rcpp::Named("summary") = summary_df
     );
+    out.attr("class") = Rcpp::CharacterVector::create("pc_single");
+
+    return out;
 }
 
 // Wrapper function to perform bootstrapped pattern causality analysis
@@ -815,10 +818,20 @@ Rcpp::List RcppPCops(
     // --- Select optimal parameters ---------------------
     Rcpp::IntegerVector pvec = OptPCparm(pmat, maximize);
 
+    // Assign column names
+    Rcpp::colnames(pmat) = Rcpp::CharacterVector::create(
+        "E", "k", "tau", "Positive", "Negative", "Dark"
+    );
+    // Convert to data.frame by setting class and row names
+    pmat.attr("class") = "data.frame";
+
     // --- Return structured results --------------------------------------------
 
-    return Rcpp::List::create(
+    Rcpp::List out = Rcpp::List::create(
         Rcpp::Named("param") = pvec,
-        Rcpp::Named("detail") = pmat
+        Rcpp::Named("xmap") = pmat
     );
+    out.attr("class") = Rcpp::CharacterVector::create("pc_ops");
+
+    return out;
 }
