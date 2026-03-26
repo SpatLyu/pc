@@ -6,6 +6,7 @@
 #include <utility>
 #include <numeric>
 #include <algorithm>
+#include <unordered_map>
 #include "pc.h"
 
 // Wrapper function to perform pattern causality analysis
@@ -28,8 +29,7 @@ Rcpp::List RcppPC(
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
-    // --- Input Conversion and Validation --------------------------------------
-
+    // --- Input Conversion and Validation ---
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
     std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
     const size_t n_obs = tg.size();
@@ -38,7 +38,8 @@ Rcpp::List RcppPC(
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
     for (auto& idx : lib_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("lib index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -50,7 +51,8 @@ Rcpp::List RcppPC(
     std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
     for (auto& idx : pred_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("pred index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -93,7 +95,7 @@ Rcpp::List RcppPC(
         tau_std[1] = tau_vec[1];
     }
 
-    // --- Embedding Construction ------------------------------------------------
+    // --- Embedding Construction ---
     std::vector<std::vector<double>> Mx;
     std::vector<std::vector<double>> My;
 
@@ -146,50 +148,167 @@ Rcpp::List RcppPC(
         );
     }
 
-    // --- Perform Pattern Causality Analysis -------------------------
-    pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
-        Mx, My, lib_std, pred_std, 
-        static_cast<size_t>(std::abs(num_neighbors)),
-        static_cast<size_t>(std::abs(zero_tolerance)),
-        static_cast<size_t>(std::abs(h)),
-        dist_metric, relative, weighted,
-        static_cast<size_t>(std::abs(threads)), true);
+    // ---- sort + unique lib/pred ----
+    std::sort(lib_std.begin(), lib_std.end());
+    lib_std.erase(
+        std::unique(lib_std.begin(), lib_std.end()),
+        lib_std.end()
+    );
 
-    // --- Create DataFrame for per-sample causality ----------------------------
+    std::sort(pred_std.begin(), pred_std.end());
+    pred_std.erase(
+        std::unique(pred_std.begin(), pred_std.end()),
+        pred_std.end()
+    );
 
-    const size_t n_samples = res.NoCausality.size();
-    Rcpp::LogicalVector real_loop(n_samples, false);
-    Rcpp::CharacterVector pattern_labels(n_samples, "no");
-
-    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) 
+    // ---- filter lib/pred (remove NaN in target/source) ----
+    size_t write = 0;
+    for (size_t i = 0; i < lib_std.size(); ++i)
     {
-        size_t idx = res.RealLoop[rl];
-        if (idx < n_samples) 
+        size_t idx = lib_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
         {
-            // Record validated samples
-            real_loop[idx] = true;
-            // Map pattern_types (0–3) → descriptive string labels
-            switch (res.PatternTypes[rl]) 
-            {
-                case 0: pattern_labels[idx]  = "no"; break;
-                case 1: pattern_labels[idx]  = "positive"; break;
-                case 2: pattern_labels[idx]  = "negative"; break;
-                case 3: pattern_labels[idx]  = "dark"; break;
-                default: pattern_labels[idx] = "unknown"; break;
-            }
+            lib_std[write++] = idx;
+        }
+    }
+    lib_std.resize(write);
+
+    write = 0;
+    for (size_t i = 0; i < pred_std.size(); ++i)
+    {
+        size_t idx = pred_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            pred_std[write++] = idx;
+        }
+    }
+    pred_std.resize(write);
+    // Copy prediction indices for mapping back to original dataset
+    std::vector<size_t> pred_indices = pred_std;
+    
+    // --- Prepare for data slicing ---
+    std::vector<size_t> selected_indices;
+    selected_indices.reserve(lib_std.size() + pred_std.size());
+    for (size_t i = 0; i < lib_std.size(); ++i)
+        selected_indices.push_back(lib_std[i]);
+    for (size_t i = 0; i < pred_std.size(); ++i)
+        selected_indices.push_back(pred_std[i]);
+    std::sort(selected_indices.begin(), selected_indices.end());
+    selected_indices.erase(
+        std::unique(selected_indices.begin(), selected_indices.end()),
+        selected_indices.end()
+    );
+
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < Mx.size());
+
+    // --- Perform Pattern Causality Analysis ---
+    pc::symdync::PatternCausalityRes res;
+
+    if (!use_subset)
+    {
+        // --- Full data: no slicing needed ---
+        res = pc::patcaus::patcaus(
+            Mx, My, lib_std, pred_std, 
+            static_cast<size_t>(std::abs(num_neighbors)),
+            static_cast<size_t>(std::abs(zero_tolerance)),
+            static_cast<size_t>(std::abs(h)),
+            dist_metric, relative, weighted,
+            static_cast<size_t>(std::abs(threads)), true);
+    }
+    else
+    {   
+        // --- Slice Mx and My ---
+        std::vector<std::vector<double>> Mx_sub;
+        std::vector<std::vector<double>> My_sub;
+
+        Mx_sub.reserve(selected_indices.size());
+        My_sub.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            size_t idx = selected_indices[i];
+            Mx_sub.push_back(Mx[idx]);
+            My_sub.push_back(My[idx]);
+        }
+
+        // --- Subset mode: build index map ---
+        std::unordered_map<size_t, size_t> index_map;
+        index_map.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            index_map[selected_indices[i]] = i;
+        }
+
+        // --- Remap lib indices ---
+        for (size_t i = 0; i < lib_std.size(); ++i)
+        {
+            lib_std[i] = index_map[lib_std[i]];
+        }
+
+        // --- Remap pred indices ---
+        for (size_t i = 0; i < pred_std.size(); ++i)
+        {
+            pred_std[i] = index_map[pred_std[i]];
+        }
+
+        // --- Run patcaus on subset ---
+        res = pc::patcaus::patcaus(
+            Mx_sub, My_sub, lib_std, pred_std, 
+            static_cast<size_t>(std::abs(num_neighbors)),
+            static_cast<size_t>(std::abs(zero_tolerance)),
+            static_cast<size_t>(std::abs(h)),
+            dist_metric, relative, weighted,
+            static_cast<size_t>(std::abs(threads)), true);
+    }
+
+    // --- Create DataFrame for per-sample causality ---
+    const size_t n_samples = res.PatternTypes.size();
+
+    // Allocate vectors
+    Rcpp::NumericVector no(n_samples);
+    Rcpp::NumericVector positive(n_samples);
+    Rcpp::NumericVector negative(n_samples);
+    Rcpp::NumericVector dark(n_samples);
+
+    Rcpp::IntegerVector real_index(n_samples);  // original indices (+1 for R)
+    Rcpp::CharacterVector pattern_labels(n_samples);
+
+    // Fill values (direct alignment with res)
+    for (size_t i = 0; i < n_samples; ++i)
+    {
+        // Restore original index (+1 for R)
+        real_index[i] = static_cast<int>(pred_indices[i] + 1);
+
+        // Directly use i (NOT idx)
+        no[i]       = res.NoCausality[i];
+        positive[i] = res.PositiveCausality[i];
+        negative[i] = res.NegativeCausality[i];
+        dark[i]     = res.DarkCausality[i];
+
+        // Pattern type mapping
+        switch (res.PatternTypes[i])
+        {
+            case 0: pattern_labels[i] = "no"; break;
+            case 1: pattern_labels[i] = "positive"; break;
+            case 2: pattern_labels[i] = "negative"; break;
+            case 3: pattern_labels[i] = "dark"; break;
+            default: pattern_labels[i] = "unknown"; break;
         }
     }
 
+    // Build DataFrame
     Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
-        Rcpp::Named("no") = Rcpp::NumericVector(res.NoCausality.begin(), res.NoCausality.end()),
-        Rcpp::Named("positive") = Rcpp::NumericVector(res.PositiveCausality.begin(), res.PositiveCausality.end()),
-        Rcpp::Named("negative") = Rcpp::NumericVector(res.NegativeCausality.begin(), res.NegativeCausality.end()),
-        Rcpp::Named("dark") = Rcpp::NumericVector(res.DarkCausality.begin(), res.DarkCausality.end()),
-        Rcpp::Named("type") = pattern_labels,
-        Rcpp::Named("valid") = real_loop
+        Rcpp::Named("index")    = real_index,
+        Rcpp::Named("no")       = no,
+        Rcpp::Named("positive") = positive,
+        Rcpp::Named("negative") = negative,
+        Rcpp::Named("dark")     = dark,
+        Rcpp::Named("type")     = pattern_labels
     );
 
-    // --- Create summary DataFrame for causal strengths ------------------------
+    // --- Create summary DataFrame for causal strengths ---
 
     Rcpp::CharacterVector causal_type = Rcpp::CharacterVector::create("positive", "negative", "dark");
     Rcpp::NumericVector causal_strength = Rcpp::NumericVector::create(res.TotalPos, res.TotalNeg, res.TotalDark);
@@ -199,7 +318,7 @@ Rcpp::List RcppPC(
         Rcpp::Named("strength") = causal_strength
     );
 
-    // --- Return structured results --------------------------------------------
+    // --- Return structured results ---
 
     Rcpp::List out = Rcpp::List::create(
         Rcpp::Named("causality") = causality_df,
@@ -237,7 +356,6 @@ Rcpp::DataFrame RcppPCboot(
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
     // --- Input Conversion and Validation --------------------------------------
-
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
     std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
     const size_t n_obs = tg.size();
@@ -246,7 +364,8 @@ Rcpp::DataFrame RcppPCboot(
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
     for (auto& idx : lib_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("lib index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -258,7 +377,8 @@ Rcpp::DataFrame RcppPCboot(
     std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
     for (auto& idx : pred_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("pred index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -354,6 +474,55 @@ Rcpp::DataFrame RcppPCboot(
         );
     }
 
+    // ---- sort + unique lib/pred ----
+    std::sort(lib_std.begin(), lib_std.end());
+    lib_std.erase(
+        std::unique(lib_std.begin(), lib_std.end()),
+        lib_std.end()
+    );
+
+    std::sort(pred_std.begin(), pred_std.end());
+    pred_std.erase(
+        std::unique(pred_std.begin(), pred_std.end()),
+        pred_std.end()
+    );
+
+    // ---- filter lib/pred (remove NaN in target/source) ----
+    size_t write = 0;
+    for (size_t i = 0; i < lib_std.size(); ++i)
+    {
+        size_t idx = lib_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            lib_std[write++] = idx;
+        }
+    }
+    lib_std.resize(write);
+
+    write = 0;
+    for (size_t i = 0; i < pred_std.size(); ++i)
+    {
+        size_t idx = pred_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            pred_std[write++] = idx;
+        }
+    }
+    pred_std.resize(write);
+    
+    // --- Prepare for data slicing ---
+    std::vector<size_t> selected_indices;
+    selected_indices.reserve(lib_std.size() + pred_std.size());
+    for (size_t i = 0; i < lib_std.size(); ++i)
+        selected_indices.push_back(lib_std[i]);
+    for (size_t i = 0; i < pred_std.size(); ++i)
+        selected_indices.push_back(pred_std[i]);
+    std::sort(selected_indices.begin(), selected_indices.end());
+    selected_indices.erase(
+        std::unique(selected_indices.begin(), selected_indices.end()),
+        selected_indices.end()
+    );
+
     // Validate and preprocess library sizes
     std::vector<size_t> libsizes_std = Rcpp::as<std::vector<size_t>>(libsizes);
     std::vector<size_t> valid_libsizes;
@@ -371,16 +540,73 @@ Rcpp::DataFrame RcppPCboot(
         valid_libsizes.push_back(lib_std.size());
     }
 
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < Mx.size());
+
     // --- Perform Bootstrapped Pattern Causality Analysis -------------------------
-    std::vector<std::vector<std::vector<double>>> res = pc::patcaus::patcaus(
-        Mx, My, libsizes_std, lib_std, pred_std, 
-        static_cast<size_t>(std::abs(num_neighbors)),
-        static_cast<size_t>(std::abs(zero_tolerance)),
-        static_cast<size_t>(std::abs(h)), dist_metric, 
-        static_cast<size_t>(std::abs(boot)), random_sample, 
-        static_cast<unsigned long long>(std::abs(seed)),
-        relative, weighted, static_cast<size_t>(std::abs(threads)),
-        static_cast<size_t>(std::abs(parallel_level)), verbose);
+    std::vector<std::vector<std::vector<double>>> res;
+
+    if (!use_subset)
+    {
+        // --- Full data: no slicing needed ---
+        res = pc::patcaus::patcaus(
+            Mx, My, libsizes_std, lib_std, pred_std, 
+            static_cast<size_t>(std::abs(num_neighbors)),
+            static_cast<size_t>(std::abs(zero_tolerance)),
+            static_cast<size_t>(std::abs(h)), dist_metric, 
+            static_cast<size_t>(std::abs(boot)), random_sample, 
+            static_cast<unsigned long long>(std::abs(seed)),
+            relative, weighted, static_cast<size_t>(std::abs(threads)),
+            static_cast<size_t>(std::abs(parallel_level)), verbose);
+    }
+    else
+    {   
+        // --- Slice Mx and My ---
+        std::vector<std::vector<double>> Mx_sub;
+        std::vector<std::vector<double>> My_sub;
+
+        Mx_sub.reserve(selected_indices.size());
+        My_sub.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            size_t idx = selected_indices[i];
+            Mx_sub.push_back(Mx[idx]);
+            My_sub.push_back(My[idx]);
+        }
+
+        // --- Subset mode: build index map ---
+        std::unordered_map<size_t, size_t> index_map;
+        index_map.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            index_map[selected_indices[i]] = i;
+        }
+
+        // --- Remap lib indices ---
+        for (size_t i = 0; i < lib_std.size(); ++i)
+        {
+            lib_std[i] = index_map[lib_std[i]];
+        }
+
+        // --- Remap pred indices ---
+        for (size_t i = 0; i < pred_std.size(); ++i)
+        {
+            pred_std[i] = index_map[pred_std[i]];
+        }
+
+        // --- Run patcaus on subset ---
+        res = pc::patcaus::patcaus(
+            Mx_sub, My_sub, libsizes_std, lib_std, pred_std, 
+            static_cast<size_t>(std::abs(num_neighbors)),
+            static_cast<size_t>(std::abs(zero_tolerance)),
+            static_cast<size_t>(std::abs(h)), dist_metric, 
+            static_cast<size_t>(std::abs(boot)), random_sample, 
+            static_cast<unsigned long long>(std::abs(seed)),
+            relative, weighted, static_cast<size_t>(std::abs(threads)),
+            static_cast<size_t>(std::abs(parallel_level)), verbose);
+    }    
 
     // --- Result Processing -----------------------------------------------------
 
@@ -504,25 +730,33 @@ Rcpp::DataFrame RcppPCboot(
 Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
                               const std::string& maximize = "positive") {
 
-  if (Emat.ncol() != 6) {
+  if (Emat.ncol() != 6) 
+  {
     Rcpp::stop("Input matrix must have exactly six columns: E k tau pos neg dark.");
   }
   int n = Emat.nrow();
-  if (n == 0) {
+  if (n == 0) 
+  {
     Rcpp::stop("Input matrix must not be empty.");
   }
 
-  if (maximize != "positive" && maximize != "negative" && maximize != "dark") {
+  if (maximize != "positive" && maximize != "negative" && maximize != "dark") 
+  {
     Rcpp::stop("maximize must be one of positive negative or dark.");
   }
 
   // establish metric priority order
   std::vector<int> priority(3);
-  if (maximize == "positive") {
+  if (maximize == "positive") 
+  {
     priority = {3, 5, 4};  // pos dark neg
-  } else if (maximize == "negative") {
+  } 
+  else if (maximize == "negative") 
+  {
     priority = {4, 5, 3};  // neg dark pos
-  } else {
+  } 
+  else 
+  {
     priority = {5, 3, 4};  // dark pos neg
   }
 
@@ -533,7 +767,8 @@ Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
 
   // record of the best metrics for comparison
   std::vector<double> best_vals(3);
-  for (int j = 0; j < 3; ++j) {
+  for (int j = 0; j < 3; ++j) 
+  {
     best_vals[j] = get_metric(0, priority[j]);
   }
 
@@ -541,17 +776,20 @@ Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
   best_rows.push_back(0);
 
   // global scan
-  for (int i = 1; i < n; ++i) {
-
+  for (int i = 1; i < n; ++i) 
+  {
     bool better = false;
     bool equal_all = true;
 
-    for (int p = 0; p < 3; ++p) {
+    for (int p = 0; p < 3; ++p) 
+    {
       double a = get_metric(i, priority[p]);
       double b = best_vals[p];
 
-      if (!pc::numericutils::doubleNearlyEqual(a, b)) {
-        if (a > b) {
+      if (!pc::numericutils::doubleNearlyEqual(a, b)) 
+      {
+        if (a > b) 
+        {
           better = true;
         }
         equal_all = false;
@@ -559,20 +797,24 @@ Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
       }
     }
 
-    if (better) {
+    if (better) 
+    {
       best_rows.clear();
       best_rows.push_back(i);
-      for (int p = 0; p < 3; ++p) {
+      for (int p = 0; p < 3; ++p) 
+      {
         best_vals[p] = get_metric(i, priority[p]);
       }
     }
-    else if (equal_all) {
+    else if (equal_all) 
+    {
       best_rows.push_back(i);
     }
   }
 
   // if only one globally optimal row return directly
-  if (best_rows.size() == 1) {
+  if (best_rows.size() == 1) 
+  {
     int row = best_rows[0];
     return Rcpp::IntegerVector::create(
       static_cast<int>(Emat(row, 0)),
@@ -590,7 +832,8 @@ Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
   int bestTau = Emat(best_idx, 2);
   int bestK = Emat(best_idx, 1);
 
-  for (int idx : best_rows) {
+  for (int idx : best_rows) 
+  {
     int E = Emat(idx, 0);
     int tau = Emat(idx, 2);
     int k = Emat(idx, 1);
@@ -600,7 +843,8 @@ Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
       (E == bestE && tau < bestTau) ||
       (E == bestE && tau == bestTau && k < bestK);
 
-    if (better) {
+    if (better) 
+    {
       best_idx = idx;
       bestE = E;
       bestTau = tau;
@@ -643,7 +887,8 @@ Rcpp::List RcppPCops(
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
     for (auto& idx : lib_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("lib index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -655,7 +900,8 @@ Rcpp::List RcppPCops(
     std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
     for (auto& idx : pred_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("pred index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -666,7 +912,8 @@ Rcpp::List RcppPCops(
     // Unique sorted embedding dimensions, neighbor values, and tau values
     std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
     // Make sure each E is greater than 2
-    for (auto& singleE : Es) {
+    for (auto& singleE : Es) 
+    {
         if (singleE < 2) singleE = 2;
     }
     std::sort(Es.begin(), Es.end());
@@ -729,12 +976,89 @@ Rcpp::List RcppPCops(
                     pred_std.end()
         );
     }
+
+    // ---- sort + unique lib/pred ----
+    std::sort(lib_std.begin(), lib_std.end());
+    lib_std.erase(
+        std::unique(lib_std.begin(), lib_std.end()),
+        lib_std.end()
+    );
+
+    std::sort(pred_std.begin(), pred_std.end());
+    pred_std.erase(
+        std::unique(pred_std.begin(), pred_std.end()),
+        pred_std.end()
+    );
+
+    // ---- filter lib/pred (remove NaN in target/source) ----
+    size_t write = 0;
+    for (size_t i = 0; i < lib_std.size(); ++i)
+    {
+        size_t idx = lib_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            lib_std[write++] = idx;
+        }
+    }
+    lib_std.resize(write);
+
+    write = 0;
+    for (size_t i = 0; i < pred_std.size(); ++i)
+    {
+        size_t idx = pred_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            pred_std[write++] = idx;
+        }
+    }
+    pred_std.resize(write);
+    
+    // --- Prepare for data slicing ---
+    std::vector<size_t> selected_indices;
+    selected_indices.reserve(lib_std.size() + pred_std.size());
+    for (size_t i = 0; i < lib_std.size(); ++i)
+        selected_indices.push_back(lib_std[i]);
+    for (size_t i = 0; i < pred_std.size(); ++i)
+        selected_indices.push_back(pred_std[i]);
+    std::sort(selected_indices.begin(), selected_indices.end());
+    selected_indices.erase(
+        std::unique(selected_indices.begin(), selected_indices.end()),
+        selected_indices.end()
+    );
+
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < tg.size());
+
+    if (use_subset)
+    {
+        std::unordered_map<size_t, size_t> index_map;
+        index_map.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            index_map[selected_indices[i]] = i;
+        }
+
+        // --- Remap lib indices ---
+        for (size_t i = 0; i < lib_std.size(); ++i)
+        {
+            lib_std[i] = index_map[lib_std[i]];
+        }
+
+        // --- Remap pred indices ---
+        for (size_t i = 0; i < pred_std.size(); ++i)
+        {
+            pred_std[i] = index_map[pred_std[i]];
+        }
+    }
     
     // --- Perform Pattern Causality Analysis -------------------------
     std::vector<std::vector<double>> result(unique_EkTau.size(), std::vector<double>(6));
 
-    if (parallel_level == 0) {
-        for (size_t i = 0; i < unique_EkTau.size(); ++i) {
+    if (parallel_level == 0) 
+    {
+        for (size_t i = 0; i < unique_EkTau.size(); ++i) 
+        {
             const size_t Ei   = std::get<0>(unique_EkTau[i]);
             const size_t ki   = std::get<1>(unique_EkTau[i]);
             const size_t taui = std::get<2>(unique_EkTau[i]);
@@ -767,12 +1091,42 @@ Rcpp::List RcppPCops(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
             }
 
-            pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
-                Mx, My, lib_std, pred_std, ki,
-                static_cast<size_t>(std::abs(zero_tolerance)),
-                static_cast<size_t>(std::abs(h)),
-                dist_metric, relative, weighted,
-                static_cast<size_t>(std::abs(threads)), false);
+            // --- Perform Pattern Causality Analysis ---
+            pc::symdync::PatternCausalityRes res;
+
+            if (!use_subset)
+            {
+                // --- Full data: no slicing needed ---
+                res = pc::patcaus::patcaus(
+                    Mx, My, lib_std, pred_std, ki,
+                    static_cast<size_t>(std::abs(zero_tolerance)),
+                    static_cast<size_t>(std::abs(h)),
+                    dist_metric, relative, weighted,
+                    static_cast<size_t>(std::abs(threads)), false);
+            }
+            else
+            {
+                // --- Subset mode: slice Mx and My ---
+                std::vector<std::vector<double>> Mx_sub;
+                std::vector<std::vector<double>> My_sub;
+                Mx_sub.reserve(selected_indices.size());
+                My_sub.reserve(selected_indices.size());
+
+                for (size_t i = 0; i < selected_indices.size(); ++i)
+                {
+                    size_t idx = selected_indices[i];
+                    Mx_sub.push_back(Mx[idx]);
+                    My_sub.push_back(My[idx]);
+                }
+
+                // --- Run patcaus on subset ---
+                res = pc::patcaus::patcaus(
+                    Mx_sub, My_sub, lib_std, pred_std, ki,
+                    static_cast<size_t>(std::abs(zero_tolerance)),
+                    static_cast<size_t>(std::abs(h)),
+                    dist_metric, relative, weighted,
+                    static_cast<size_t>(std::abs(threads)), false);
+            }
 
             result[i][0] = Ei;
             result[i][1] = ki;
@@ -781,7 +1135,9 @@ Rcpp::List RcppPCops(
             result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
             result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
         }
-    } else {
+    } 
+    else 
+    {
         // Configure threads
         size_t threads_sizet = static_cast<size_t>(std::abs(threads));
         threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
@@ -818,12 +1174,40 @@ Rcpp::List RcppPCops(
                 My = pc::embed::embed(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
             }
+            
+            pc::symdync::PatternCausalityRes res;
 
-            pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
-                Mx, My, lib_std, pred_std, ki,
-                static_cast<size_t>(std::abs(zero_tolerance)),
-                static_cast<size_t>(std::abs(h)),
-                dist_metric, relative, weighted, 1);
+            if (!use_subset)
+            {
+                // --- Full data: no slicing needed ---
+                res = pc::patcaus::patcaus(
+                    Mx, My, lib_std, pred_std, ki,
+                    static_cast<size_t>(std::abs(zero_tolerance)),
+                    static_cast<size_t>(std::abs(h)),
+                    dist_metric, relative, weighted, 1, false);
+            }
+            else
+            {
+                // --- Subset mode: slice Mx and My ---
+                std::vector<std::vector<double>> Mx_sub;
+                std::vector<std::vector<double>> My_sub;
+                Mx_sub.reserve(selected_indices.size());
+                My_sub.reserve(selected_indices.size());
+
+                for (size_t i = 0; i < selected_indices.size(); ++i)
+                {
+                    size_t idx = selected_indices[i];
+                    Mx_sub.push_back(Mx[idx]);
+                    My_sub.push_back(My[idx]);
+                }
+
+                // --- Run patcaus on subset ---
+                res = pc::patcaus::patcaus(
+                    Mx_sub, My_sub, lib_std, pred_std, ki,
+                    static_cast<size_t>(std::abs(zero_tolerance)),
+                    static_cast<size_t>(std::abs(h)),
+                    dist_metric, relative, weighted, 1, false);
+            }
 
             result[i][0] = Ei;
             result[i][1] = ki;

@@ -133,8 +133,38 @@ namespace patcaus
     // --------------------------------------------------------------------------
     // Step 4: Compute pattern-based causality using symbolic pattern comparison
     // --------------------------------------------------------------------------
-    pc::symdync::PatternCausalityRes res = 
-        pc::symdync::computePatternCausality(SMx, SMy, PredSMy, weighted, save_detail);
+    pc::symdync::PatternCausalityRes res;
+    bool use_subset = (pred_indices.size() < Mx.size());
+
+    if (!use_subset)
+    {
+        // --- Full data: no slicing needed ---
+        res = pc::symdync::computePatternCausality(
+            SMx, SMy, PredSMy, weighted, save_detail);
+    }
+    else
+    {
+        // --- Slice Mx and My ---
+        std::vector<std::vector<double>> SMx_sub;
+        std::vector<std::vector<double>> SMy_sub;
+        std::vector<std::vector<double>> PredSMy_sub;
+
+        SMx_sub.reserve(pred_indices.size());
+        SMy_sub.reserve(pred_indices.size());
+        PredSMy_sub.reserve(pred_indices.size());
+
+        for (size_t i = 0; i < pred_indices.size(); ++i)
+        {
+            size_t idx = pred_indices[i];
+            SMx_sub.push_back(SMx[idx]);
+            SMy_sub.push_back(SMy[idx]);
+            PredSMy_sub.push_back(PredSMy[idx]);
+        }
+
+        // --- Compute patcaus on subset ---
+        res = pc::symdync::computePatternCausality(
+            SMx_sub, SMy_sub, PredSMy_sub, weighted, save_detail);
+    }
 
     return res;
     }
@@ -263,6 +293,9 @@ namespace patcaus
     if (verbose)
         bar = std::make_unique<RcppThread::ProgressBar>(n_libsizes, 1);
 
+    // --- Check if full set is used ---
+    bool use_subset = (pred_indices.size() < Mx.size());
+
     // --------------------------------------------------------------------------
     // Step 5: Iterate over library sizes
     // --------------------------------------------------------------------------
@@ -291,8 +324,36 @@ namespace patcaus
             else
                 PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
 
-            pc::symdync::PatternCausalityRes res = pc::symdync::computePatternCausality(
-                SMx, SMy, PredSMy, weighted, false);
+            pc::symdync::PatternCausalityRes res;
+            if (!use_subset)
+            {
+                // --- Full data: no slicing needed ---
+                res = pc::symdync::computePatternCausality(
+                    SMx, SMy, PredSMy, weighted, false);
+            }
+            else
+            {
+                // --- Slice Mx and My ---
+                std::vector<std::vector<double>> SMx_sub;
+                std::vector<std::vector<double>> SMy_sub;
+                std::vector<std::vector<double>> PredSMy_sub;
+
+                SMx_sub.reserve(pred_indices.size());
+                SMy_sub.reserve(pred_indices.size());
+                PredSMy_sub.reserve(pred_indices.size());
+
+                for (size_t i = 0; i < pred_indices.size(); ++i)
+                {
+                    size_t idx = pred_indices[i];
+                    SMx_sub.push_back(SMx[idx]);
+                    SMy_sub.push_back(SMy[idx]);
+                    PredSMy_sub.push_back(PredSMy[idx]);
+                }
+
+                // --- Compute patcaus on subset ---
+                res = pc::symdync::computePatternCausality(
+                    SMx_sub, SMy_sub, PredSMy_sub, weighted, false);
+            }
 
             all_results[0][li][b] = res.TotalPos;
             all_results[1][li][b] = res.TotalNeg;
