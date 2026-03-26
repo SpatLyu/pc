@@ -49,7 +49,7 @@ namespace pc
 
 namespace patcaus
 {   
-    /************************************************************************
+    /**********************************************************************************
      *  Compute pattern-based causality from Mx to My using a fixed
      *  library and prediction set.
      *
@@ -64,7 +64,8 @@ namespace patcaus
      *      relative        : Use relative symbolic encoding
      *      weighted        : Use weighted pattern comparison
      *      threads         : Number of threads for parallel execution
-     ************************************************************************/
+     *      save_detail     : Make per-sample causality output
+     **********************************************************************************/
     inline pc::symdync::PatternCausalityRes patcaus(
         const std::vector<std::vector<double>>& Mx,
         const std::vector<std::vector<double>>& My,
@@ -76,7 +77,8 @@ namespace patcaus
         const std::string& dist_metric = "euclidean",
         bool relative = true,
         bool weighted = true,
-        size_t threads = 1)
+        size_t threads = 1,
+        bool save_detail = true)
     {
     // Configure threads (cap at hardware concurrency)
     threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
@@ -96,7 +98,7 @@ namespace patcaus
         for (size_t li : lib_indices) 
         {   
             if (pi == li) continue;
-            
+
             double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true);
             if (!std::isnan(dist)) 
             {
@@ -132,7 +134,7 @@ namespace patcaus
     // Step 4: Compute pattern-based causality using symbolic pattern comparison
     // --------------------------------------------------------------------------
     pc::symdync::PatternCausalityRes res = 
-        pc::symdync::computePatternCausality(SMx, SMy, PredSMy, weighted);
+        pc::symdync::computePatternCausality(SMx, SMy, PredSMy, weighted, save_detail);
 
     return res;
     }
@@ -290,7 +292,7 @@ namespace patcaus
                 PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
 
             pc::symdync::PatternCausalityRes res = pc::symdync::computePatternCausality(
-                SMx, SMy, PredSMy, weighted);
+                SMx, SMy, PredSMy, weighted, false);
 
             all_results[0][li][b] = res.TotalPos;
             all_results[1][li][b] = res.TotalNeg;

@@ -153,7 +153,7 @@ Rcpp::List RcppPC(
         static_cast<size_t>(std::abs(zero_tolerance)),
         static_cast<size_t>(std::abs(h)),
         dist_metric, relative, weighted,
-        static_cast<size_t>(std::abs(threads)));
+        static_cast<size_t>(std::abs(threads)), true);
 
     // --- Create DataFrame for per-sample causality ----------------------------
 
@@ -687,7 +687,7 @@ Rcpp::List RcppPCops(
         for (size_t kk : ks)
         {   
             if (kk < ee) continue;
-            
+
             for (size_t tt : taus)
                 unique_EkTau.emplace_back(ee, kk, tt);
 
@@ -772,7 +772,7 @@ Rcpp::List RcppPCops(
                 static_cast<size_t>(std::abs(zero_tolerance)),
                 static_cast<size_t>(std::abs(h)),
                 dist_metric, relative, weighted,
-                static_cast<size_t>(std::abs(threads)));
+                static_cast<size_t>(std::abs(threads)), false);
 
             result[i][0] = Ei;
             result[i][1] = ki;
