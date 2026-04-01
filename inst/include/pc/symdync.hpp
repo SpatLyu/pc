@@ -441,7 +441,7 @@ namespace symdync
      *
      *  7. Optional strength weighting:
      *
-     *       erf( ||pred_Y|| / (||Y|| + 1e-6) )
+     *       erf( ||pred_Y|| / (||X|| + 1e-6) )
      */
     inline PatternCausalityRes computePatternCausality(
         const std::vector<std::vector<double>>& SMx,
@@ -573,22 +573,18 @@ namespace symdync
                 continue;
 
             /* --- causality existence --- */
-            if (PY_pred[t] != PY_real[t])
-            {   
-                if (save_detail)
-                {
-                    res.NoCausality[t] = 1.0;
-                    res.PatternTypes.push_back(0);
-                }
-                continue;
-            }
+            bool causality_exit = PY_pred[t] == PY_real[t];
 
             /* --- strength --- */
-            double strength = weighted
-                ? std::erf(
-                    norm_ignore_nan(pred_SMy[t]) /
-                    (norm_ignore_nan(SMy[t]) + 1e-6))
-                : 1.0;
+            double strength = 0.0;
+            if (causality_exit)
+            {
+                strength = weighted
+                    ? std::erf(
+                        norm_ignore_nan(pred_SMy[t]) /
+                        (norm_ignore_nan(SMx[t]) + 1e-6))
+                    : 1.0;
+            }
 
             /* --- index lookup --- */
             auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
@@ -600,10 +596,27 @@ namespace symdync
             size_t i = std::distance(all_patterns.begin(), it_i);
             size_t j = std::distance(all_patterns.begin(), it_j);
 
+            /* --- heatmap --- */
+            if (std::isnan(heatmap[i][j]))
+            {
+                heatmap[i][j] = strength;
+                counts[i][j] = 1;
+            }
+            else
+            {
+                heatmap[i][j] += strength;
+                counts[i][j] += 1;
+            }
+
             /* --- classification --- */
             if (save_detail)
             {
-                if (i == j)
+                if (!causality_exit)
+                {
+                    res.NoCausality[t] = 1.0;
+                    res.PatternTypes.push_back(0);
+                }
+                else if (i == j)
                 {
                     res.PositiveCausality[t] = strength;
                     res.PatternTypes.push_back(1);
@@ -618,18 +631,6 @@ namespace symdync
                     res.DarkCausality[t] = strength;
                     res.PatternTypes.push_back(3);
                 }
-            }
-
-            /* --- heatmap --- */
-            if (std::isnan(heatmap[i][j]))
-            {
-                heatmap[i][j] = strength;
-                counts[i][j] = 1;
-            }
-            else
-            {
-                heatmap[i][j] += strength;
-                counts[i][j] += 1;
             }
         }
 
