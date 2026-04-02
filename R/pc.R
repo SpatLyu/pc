@@ -68,11 +68,17 @@
 #' @param verbose (optional) Whether to show the progress bar.
 #' @param h (optional) Prediction horizon.
 #'
-#' @return A list (when `libsizes` is `NULL`) or data.frame.
-#' If `libsizes` is `NULL`, a list with two components is returned:
+#' @return A list.
 #' \describe{
-#'   \item{causality}{A data.frame containing per-sample causality results.}
-#'   \item{summary}{A data.frame summarizing overall causality metrics.}
+#'   \item{causality}{
+#'     A data.frame of causality results. When `libsizes` is `NULL`, it contains
+#'     per-sample causality estimates; otherwise, it contains causality results
+#'     evaluated across different library sizes.
+#'   }
+#'   \item{summary}{
+#'     A data.frame summarizing overall causality metrics. Only returned when
+#'     `libsizes` is `NULL`.
+#'   }
 #' }
 #'
 #' @export
