@@ -2,7 +2,9 @@
 
 ### new
 
-* Provide `fnn()` generic for *false nearest neighbors* method (#49).
+* Extend `pc` generic with visualization capabilities (#55).
+
+* Provide `fnn` generic for *false nearest neighbors* method (#49).
 
 * Add Loess Plateau precipitation–soil moisture–NDVI case dataset (#41).
 
@@ -10,7 +12,7 @@
 
 ### enhancements
 
-* Enable method dispatch compatibility in `pc()` and `ops()` generics via `...` (#43).
+* Enable method dispatch compatibility in `pc` and `ops` generics via `...` (#43).
 
 * Improve handling of large-scale inputs (#33).
 
