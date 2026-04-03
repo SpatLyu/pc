@@ -422,8 +422,7 @@ namespace symdync
     };
 
     /**
-     * Compute pattern causality from Y to X.
-     *
+     * Compute pattern causality from X to Y.
      *
      * Pipeline:
      *
@@ -457,15 +456,15 @@ namespace symdync
         if (n == 0) return res;
         
         /* ------------------------------------------------------------
-        *  1. Generate symbolic pattern
-        * ------------------------------------------------------------ */
+         *  1. Generate symbolic pattern
+         * ------------------------------------------------------------ */
         std::vector<std::vector<uint8_t>> PX = genPatternSpace(SMx, true);
         std::vector<std::vector<uint8_t>> PY_real = genPatternSpace(SMy, true);
         std::vector<std::vector<uint8_t>> PY_pred = genPatternSpace(pred_SMy, true);
 
         /* ------------------------------------------------------------
-        *  2. Collect and filter pattern space
-        * ------------------------------------------------------------ */
+         *  2. Collect and filter pattern space
+         * ------------------------------------------------------------ */
         std::vector<std::vector<uint8_t>> all_patterns;
         all_patterns.reserve(n * 3);
 
@@ -491,8 +490,8 @@ namespace symdync
         );
 
         /* ------------------------------------------------------------
-        *  3. Symmetric closure
-        * ------------------------------------------------------------ */
+         *  3. Symmetric closure
+         * ------------------------------------------------------------ */
         size_t original_size = all_patterns.size();
 
         for (size_t i = 0; i < original_size; ++i)
@@ -542,7 +541,7 @@ namespace symdync
             res.PositiveCausality.assign(n, 0.0);
             res.NegativeCausality.assign(n, 0.0);
             res.DarkCausality.assign(n, 0.0);
-            res.PatternTypes.reserve(n);
+            res.PatternTypes.assign(n, 0);
         }
 
         std::vector<std::vector<double>> heatmap(
@@ -614,22 +613,21 @@ namespace symdync
                 if (!causality_exit)
                 {
                     res.NoCausality[t] = 1.0;
-                    res.PatternTypes.push_back(0);
                 }
                 else if (i == j)
                 {
                     res.PositiveCausality[t] = strength;
-                    res.PatternTypes.push_back(1);
+                    res.PatternTypes[t] = 1;
                 }
                 else if (j == opposite_id[i])
                 {
                     res.NegativeCausality[t] = strength;
-                    res.PatternTypes.push_back(2);
+                    res.PatternTypes[t] = 2;
                 }
                 else
                 {
                     res.DarkCausality[t] = strength;
-                    res.PatternTypes.push_back(3);
+                    res.PatternTypes[t] = 3;
                 }
             }
         }
