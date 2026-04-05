@@ -57,8 +57,8 @@
 #' @aliases ops,data.frame-method
 #'
 #' @examples
-#' columbus = sf::read_sf(system.file("case/columbus.gpkg", package="spEDM"))
-#' pc::ops(columbus, 1, 3, E = 3:10, maximize = "negative", threads = 1)
+#' crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
+#' pc::ops(crash, 1, 2, E = 3:10, maximize = "positive", threads = 1)
 #'
 methods::setMethod("ops", "data.frame", .ops_ts)
 

@@ -65,8 +65,8 @@
 #' Kennel, M.B., Brown, R., Abarbanel, H.D.I., 1992. Determining embedding dimension for phase-space reconstruction using a geometrical construction. Physical Review A 45, 3403–3411.
 #'
 #' @examples
-#' columbus = sf::read_sf(system.file("case/columbus.gpkg", package="spEDM"))
-#' pc::fnn(columbus, 1, threads = 1)
+#' crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
+#' pc::fnn(crash, 1, threads = 1)
 #'
 methods::setMethod("fnn", "data.frame", .fnn_ts)
 
