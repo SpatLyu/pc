@@ -447,7 +447,7 @@ namespace symdync
     * @param pat2 Second pattern space.
     * @return     Vector containing positive and negative proportions.
     */
-    inline std::vector<double> CountSignProp(
+    inline std::vector<double> countSignProp(
         const std::vector<std::vector<uint8_t>>& pat1,
         const std::vector<std::vector<uint8_t>>& pat2
     )
@@ -593,7 +593,7 @@ namespace symdync
     *
     * ---------------------------------------------------------------------------
     */
-    inline PatternCausalityRes ComputePatternCausality(
+    inline PatternCausalityRes computePatternCausality(
         const std::vector<std::vector<double>>& SMx,
         const std::vector<std::vector<double>>& SMy,
         const std::vector<std::vector<double>>& pred_SMy,
