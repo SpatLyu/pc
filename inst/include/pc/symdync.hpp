@@ -1,131 +1,21 @@
-/********************************************************************
- *  File: symdync.hpp
+/********************************************************************************
+ * File: symdync.hpp
  *
- *  Symbolic Dynamics Utilities for High Performance
- *  Pattern Construction, Encoding and Causality Analysis
+ * High-performance symbolic dynamics utilities for pattern-based causal analysis.
  *
- *  ----------------------------------------------------------------
- *  Overview
- *  ----------------------------------------------------------------
+ * Provides lightweight functions for:
+ *   - Transforming continuous state space data into discrete symbolic patterns.
+ *   - Computing signature spaces via absolute or relative successive differences.
+ *   - Encoding symbolic patterns with compact uint8 representation (0=NA, 1=down, 2=stable, 3=up).
+ *   - Quantifying sign agreement proportions between pattern sequences.
+ *   - Constructing causal heatmaps and classifying interactions as positive, negative, dark, or null.
  *
- *  This header provides lightweight and computationally efficient
- *  utilities for transforming continuous state space data into
- *  symbolic representations suitable for large scale dynamical,
- *  causal and information theoretic analysis.
+ * Designed for large-scale, high-frequency time series and spatial cross-sectional data
+ * where memory efficiency, deterministic indexing, and cache-friendly access patterns are critical.
  *
- *  The implementation is designed for high dimensional,
- *  high frequency and large sample size scenarios where memory
- *  efficiency and deterministic behavior are critical.
- *
- *  ----------------------------------------------------------------
- *  Core Functionalities
- *  ----------------------------------------------------------------
- *
- *  1. GenSignatureSpace
- *
- *     Converts a continuous state space matrix into a signature
- *     space matrix by computing successive differences or relative
- *     changes between adjacent time steps.
- *
- *  2. GenPatternSpace
- *
- *     Converts a continuous signature matrix into compact discrete
- *     symbolic patterns using uint8 encoding.
- *
- *     Output is a pattern space represented as:
- *
- *         std::vector<std::vector<uint8_t>>
- *
- *  3. GenSymbolicPattern
- *
- *     Combines the functionality of GenSignatureSpace and GenPatternSpace
- *     into a single step. For each row of a state space matrix:
- *
- *     Output type: std::vector<std::vector<uint8_t>>
- *
- *  4. CountSignProp
- *
- *     Compares two symbolic pattern spaces and computes the
- *     proportion of sign agreement and disagreement.
- *
- *  5. ComputePatternCausality
- *
- *     Constructs a complete symbolic pattern space, enforces
- *     symmetric closure, builds a causal heatmap and classifies
- *     each observation into:
- *
- *         0  No causality
- *         1  Positive causality
- *         2  Negative causality
- *         3  Dark causality
- *
- *     Returns detailed per observation results and aggregated
- *     metrics.
- *
- *  ----------------------------------------------------------------
- *  Data Conventions
- *  ----------------------------------------------------------------
- *
- *  Signature Matrix:
- *
- *      std::vector<std::vector<double>>
- *      Dimension: [n_rows x n_cols]
- *
- *  Pattern Representation:
- *
- *      std::vector<std::vector<uint8_t>>
- *      Dimension: [n_rows x pattern_length]
- *
- *  Symbol Encoding:
- *
- *      0  -> NA or undefined
- *      1  -> Downward change
- *      2  -> Stable or no change
- *      3  -> Upward change
- *
- *  ----------------------------------------------------------------
- *  NA Handling
- *  ----------------------------------------------------------------
- *
- *  Controlled by the parameter `na_rm`.
- *
- *      na_rm = true
- *
- *          Any row containing NaN is replaced by a single element
- *          pattern {0}, marking the observation as invalid.
- *
- *      na_rm = false
- *
- *          NaN values are encoded explicitly as symbol 0 inside
- *          the pattern vector.
- *
- *  ----------------------------------------------------------------
- *  Sign Comparison Rules
- *  ----------------------------------------------------------------
- *
- *  Valid comparison requires both symbols to be non zero.
- *
- *  Positive agreement:
- *
- *      (1,1), (2,2), (3,3)
- *
- *  Negative agreement:
- *
- *      (1,3), (3,1)
- *
- *  Symbol 2 only matches positively with 2.
- *
- *  Output of CountSignProp:
- *
- *      std::vector<double> of size 2:
- *
- *          [ positive_ratio , negative_ratio ]
- *
- *      If no valid comparisons exist, both values are NaN.
- *
- *  Wenbo Lyu (Github: @SpatLyu)
- *  License: GPL-3
- ********************************************************************/
+ * Author: Wenbo Lyu (Github: @SpatLyu)
+ * License: GPL-3
+ ********************************************************************************/
 
 #ifndef PC_SYMDYNC_HPP
 #define PC_SYMDYNC_HPP
