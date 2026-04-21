@@ -233,29 +233,54 @@ std::vector<std::vector<double>> projection(
         // weights[i] = std::max(w, 1e-6);
       }
     }
-    double total_weight = std::accumulate(weights.begin(), weights.end(), 0.0);
 
-    for (size_t dim = 0; dim < n_sig_dim; ++dim) {
-      int zero_count = 0;
-      double weighted_sum = 0.0;
-      bool has_valid = false;
+    if (h == 0) { // no projection horizon
+      double total_weight = std::accumulate(weights.begin(), weights.end(), 0.0);
 
-      for (size_t i = 0; i < k; ++i) {
-        size_t lib_row = valid_libs[neighbor_indices[i]];
-        // double val = SMy[lib_row][dim]; // no projection horizon
-        size_t target_row = lib_row + h;
-        if (target_row >= n_obs) continue;
-        double val = SMy[target_row][dim];
-        if (std::isnan(val)) continue;
-        if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
-        weighted_sum += val * weights[i];
-        has_valid = true;
+      for (size_t dim = 0; dim < n_sig_dim; ++dim) {
+        int zero_count = 0;
+        double weighted_sum = 0.0;
+        bool has_valid = false;
+
+        for (size_t i = 0; i < k; ++i) {
+          size_t lib_row = valid_libs[neighbor_indices[i]];
+          double val = SMy[lib_row][dim]; 
+          if (std::isnan(val)) continue;
+          if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
+          weighted_sum += val * weights[i];
+          has_valid = true;
+        }
+
+        if (zero_count > zero_tolerance) {
+          pred_signatures[p][dim] = 0.0;
+        } else if (has_valid && total_weight > 0.0) {
+          pred_signatures[p][dim] = weighted_sum / total_weight;
+        }
       }
+    } else {
+      for (size_t dim = 0; dim < n_sig_dim; ++dim) {
+        int zero_count = 0;
+        double weighted_sum = 0.0;
+        double used_weight = 0.0;
+        bool has_valid = false;
 
-      if (zero_count > zero_tolerance) {
-        pred_signatures[p + h][dim] = 0.0;
-      } else if (has_valid && total_weight > 0.0) {
-        pred_signatures[p + h][dim] = weighted_sum / total_weight;
+        for (size_t i = 0; i < k; ++i) {
+          size_t lib_row = valid_libs[neighbor_indices[i]];
+          size_t target_row = lib_row + h;
+          if (target_row >= n_obs) continue;
+          double val = SMy[target_row][dim];
+          if (std::isnan(val)) continue;
+          if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
+          weighted_sum += val * weights[i];
+          used_weight += weights[i];
+          has_valid = true;
+        }
+
+        if (zero_count > zero_tolerance) {
+          pred_signatures[p + h][dim] = 0.0;
+        } else if (has_valid && used_weight > 0.0) {
+          pred_signatures[p + h][dim] = weighted_sum / used_weight;
+        }
       }
     }
   };
