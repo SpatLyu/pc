@@ -552,34 +552,29 @@ namespace symdync
     };
 
     /**
-    * ---------------------------------------------------------------------------
-    * @brief Compute symbolic pattern causality between X and Y.
-    *
-    * This function operates entirely on uint8 symbolic patterns generated
-    * by GenPatternSpace.
-    *
-    * Pipeline:
-    *
-    *  1. Collect unique patterns from X, Y_real and Y_pred.
-    *  2. Remove patterns containing symbol 0.
-    *  3. Add symmetric opposite patterns (1 <-> 3).
-    *  4. Sort lexicographically to obtain deterministic indexing.
-    *  5. Build K x K causal heatmap.
-    *  6. Classify each observation:
-    *
-    *       0  No causality
-    *       1  Positive     (main diagonal)
-    *       2  Negative     (anti diagonal)
-    *       3  Dark         (other off diagonal)
-    *
-    *  7. Optional strength weighting:
-    *
-    *       erf( ||pred_Y|| / (||Y|| + 1e-6) )
-    *
-    * Pattern space completeness is guaranteed.
-    *
-    * ---------------------------------------------------------------------------
-    */
+     * Compute symbolic pattern causality between X and Y.
+     *
+     *
+     * Pipeline:
+     *
+     *  1. Collect unique patterns from X, Y_real and Y_pred.
+     *  2. Remove patterns containing symbol 0.
+     *  3. Add symmetric opposite patterns (1 <-> 3).
+     *  4. Sort lexicographically to obtain deterministic indexing.
+     *  5. Build K x K causal heatmap.
+     *  6. Classify each observation:
+     *
+     *       0  No causality
+     *       1  Positive     (main diagonal)
+     *       2  Negative     (anti diagonal)
+     *       3  Dark         (other off diagonal)
+     *
+     *  7. Optional strength weighting:
+     *
+     *       erf( ||pred_Y|| / (||Y|| + 1e-6) )
+     *
+     * Pattern space completeness is guaranteed.
+     */
     inline PatternCausalityRes computePatternCausality(
         const std::vector<std::vector<double>>& SMx,
         const std::vector<std::vector<double>>& SMy,
