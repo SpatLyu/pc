@@ -608,9 +608,9 @@ namespace symdync
         /* ------------------------------------------------------------
         *  1. Generate symbolic pattern
         * ------------------------------------------------------------ */
-        std::vector<std::vector<uint8_t>> PX = GenPatternSpace(SMx, true);
-        std::vector<std::vector<uint8_t>> PY_real = GenPatternSpace(SMy, true);
-        std::vector<std::vector<uint8_t>> PY_pred = GenPatternSpace(pred_SMy, true);
+        std::vector<std::vector<uint8_t>> PX = genPatternSpace(SMx, true);
+        std::vector<std::vector<uint8_t>> PY_real = genPatternSpace(SMy, true);
+        std::vector<std::vector<uint8_t>> PY_pred = genPatternSpace(pred_SMy, true);
 
         /* ------------------------------------------------------------
         *  2. Collect and filter pattern space
