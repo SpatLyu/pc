@@ -668,15 +668,6 @@ namespace symdync
                 contains_zero(PY_pred[t]))
                 continue;
 
-            auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
-            auto it_j = std::lower_bound(all_patterns.begin(), all_patterns.end(), PY_pred[t]);
-
-            if (it_i == all_patterns.end() || it_j == all_patterns.end())
-                continue;
-
-            size_t i = std::distance(all_patterns.begin(), it_i);
-            size_t j = std::distance(all_patterns.begin(), it_j);
-
             res.RealLoop.push_back(static_cast<int>(t));
 
             double strength = 0.0;
@@ -689,24 +680,23 @@ namespace symdync
                         (norm_ignore_nan(SMy[t]) + 1e-6))
                     : 1.0;
             }
-
-            if (std::isnan(heatmap[i][j]))
-            {
-                heatmap[i][j] = strength;
-                counts[i][j] = 1;
-            }
-            else
-            {
-                heatmap[i][j] += strength;
-                counts[i][j] += 1;
-            }
-
-            if (strength == 0.0)
-            {
+            else 
+            {   
                 res.NoCausality[t] = 1.0;
                 res.PatternTypes.push_back(0);
+                continue;
             }
-            else if (i == j && static_cast<double>(i) != midpoint)
+
+            auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
+            auto it_j = std::lower_bound(all_patterns.begin(), all_patterns.end(), PY_pred[t]);
+
+            if (it_i == all_patterns.end() || it_j == all_patterns.end())
+                continue;
+
+            size_t i = std::distance(all_patterns.begin(), it_i);
+            size_t j = std::distance(all_patterns.begin(), it_j);
+
+            if (i == j && static_cast<double>(i) != midpoint)
             {
                 res.PositiveCausality[t] = strength;
                 res.PatternTypes.push_back(1);
@@ -720,6 +710,17 @@ namespace symdync
             {
                 res.DarkCausality[t] = strength;
                 res.PatternTypes.push_back(3);
+            }
+
+            if (std::isnan(heatmap[i][j]))
+            {
+                heatmap[i][j] = strength;
+                counts[i][j] = 1;
+            }
+            else
+            {
+                heatmap[i][j] += strength;
+                counts[i][j] += 1;
             }
         }
 
