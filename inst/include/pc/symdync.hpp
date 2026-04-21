@@ -508,21 +508,8 @@ namespace symdync
     }
 
     /***************************************************************
-    *
-    *  Symbolic Pattern Causality
-    *
-    *  Lightweight high performance implementation.
-    *
-    *  Design principles:
-    *
-    *    - Uses uint8 pattern representation
-    *    - 2 bit packing per symbol
-    *    - Deterministic pattern indexing
-    *    - Symmetric pattern space completion
-    *    - Single computation function
-    *    - Minimal auxiliary utilities
-    *
-    ***************************************************************/
+     *  Symbolic Pattern Causality Analysis Result
+     ***************************************************************/
 
     struct PatternCausalityRes
     {
