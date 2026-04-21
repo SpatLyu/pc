@@ -41,6 +41,9 @@ namespace projection
  * @param num_neighbors  Number of nearest neighbors to use. If <= 0, defaults to E+1.
  * @param zero_tolerance Maximum allowed zero values per dimension before forcing prediction to zero.
  *                       If <= 0, defaults to E−1.
+ * @param h              Prediction horizon (time shift). Defines how far ahead in time the prediction is performed.
+ *                       For each base index p, nearest neighbors are identified at time p, and their future states 
+ *                       at time (lib_row + h) are used to predict the target state at time (p + h).
  * @param threads        Number of threads to use. If <= 1, runs serially; otherwise runs parallel.
  *
  * @return A matrix of predicted signature vectors, sized SMy.size() × (E−1).
@@ -52,6 +55,7 @@ std::vector<std::vector<double>> projection(
     const std::vector<size_t>& pred_indices,
     int num_neighbors = 0,   /* = std::numeric_limits<int>::min() */
     int zero_tolerance = 0,  /* = std::numeric_limits<int>::max() */
+    size_t h = 0,
     size_t threads = 1
 ) {
   const size_t n_obs = SMy.size();
