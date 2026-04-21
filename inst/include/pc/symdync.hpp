@@ -311,30 +311,27 @@ namespace symdync
     }
 
     /**
-    * @brief Generates a symbolic pattern representation from a continuous state space matrix.
-    *
-    * This function combines signature space computation and pattern encoding:
-    *   1. Compute differences between successive columns for each row:
-    *      - relative = true  : (x[i+1] - x[i]) / x[i]
-    *      - relative = false : x[i+1] - x[i]
-    *   2. Map the resulting values to discrete symbols (uint8_t):
-    *        0 -> NA / undefined (NaN)
-    *        1 -> negative change (value < 0)
-    *        2 -> no change       (value == 0)
-    *        3 -> positive change (value > 0)
-    *   3. Optional na_rm behavior:
-    *        - na_rm = true  : rows with any NaN are replaced by {0}
-    *        - na_rm = false : NaN values encoded as 0, row otherwise kept
-    *
-    * This combines the functionality of GenSignatureSpace + GenPatternSpace
-    * into a single high-performance pipeline.
-    *
-    * @param mat       Input state space matrix [n_rows x n_cols].
-    * @param relative  If true, compute relative changes; else absolute changes.
-    * @param na_rm     Whether to remove rows containing NaN (default: true).
-    * @return          Symbolic pattern matrix [n_rows x (n_cols - 1)], each row is a uint8_t vector.
-    * @throws std::invalid_argument if input is empty or has fewer than 2 columns.
-    */
+     * Generates a symbolic pattern representation from a continuous state space matrix.
+     *
+     * This function combines signature space computation and pattern encoding:
+     *   1. Compute differences between successive columns for each row:
+     *      - relative = true  : (x[i+1] - x[i]) / x[i]
+     *      - relative = false : x[i+1] - x[i]
+     *   2. Map the resulting values to discrete symbols (uint8_t):
+     *        0 -> NA / undefined (NaN)
+     *        1 -> negative change (value < 0)
+     *        2 -> no change       (value == 0)
+     *        3 -> positive change (value > 0)
+     *   3. Optional na_rm behavior:
+     *        - na_rm = true  : rows with any NaN are replaced by {0}
+     *        - na_rm = false : NaN values encoded as 0, row otherwise kept
+     *
+     * @param mat       Input state space matrix [n_rows x n_cols].
+     * @param relative  If true, compute relative changes; else absolute changes.
+     * @param na_rm     Whether to remove rows containing NaN (default: true).
+     * @return          Symbolic pattern matrix [n_rows x (n_cols - 1)], each row is a uint8_t vector.
+     * @throws std::invalid_argument if input is empty or has fewer than 2 columns.
+     */
     inline std::vector<std::vector<uint8_t>> genSymbolicPattern(
         const std::vector<std::vector<double>>& mat,
         bool relative = false,
@@ -366,7 +363,7 @@ namespace symdync
                 double diff = row[j + 1] - row[j];
 
                 // Compute relative change if requested
-                if (relative && !std::isnan(diff) && !NumericUtils::doubleNearlyEqual(row[j], 0.0)) {
+                if (relative && !std::isnan(diff) && !pc::numericutils::doubleNearlyEqual(row[j], 0.0)) {
                     diff /= row[j];
                 }
 
