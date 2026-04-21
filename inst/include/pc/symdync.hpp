@@ -551,19 +551,6 @@ namespace symdync
         double TotalDark     = std::numeric_limits<double>::quiet_NaN();
     };
 
-    /* ---------------------------------------------------------
-    *   Robust Hash Function for std::pair<size_t, size_t>
-    *   Uses Boost-style hash_combine for minimal collisions
-    * --------------------------------------------------------- */
-    struct PairHash {
-        size_t operator()(const std::pair<size_t, size_t>& p) const {
-            size_t seed = std::hash<size_t>{}(p.first);
-            seed ^= std::hash<size_t>{}(p.second) + 0x9e3779b9 + 
-                    (seed << 6) + (seed >> 2);
-            return seed;
-        }
-    };
-
     /**
     * ---------------------------------------------------------------------------
     * @brief Compute symbolic pattern causality between X and Y.
