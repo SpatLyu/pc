@@ -510,20 +510,25 @@ namespace symdync
     /***************************************************************
      *  Symbolic Pattern Causality Analysis Result
      ***************************************************************/
-
     struct PatternCausalityRes
     {
+        // Per-observation causality strength
         std::vector<double> NoCausality;
         std::vector<double> PositiveCausality;
         std::vector<double> NegativeCausality;
         std::vector<double> DarkCausality;
 
+        // Pattern classification per valid observation
+        // 0: No causality
+        // 1: Positive
+        // 2: Negative
+        // 3: Dark
         std::vector<int> PatternTypes;
+
+        // Indices of valid observations (after filtering)
         std::vector<int> RealLoop;
 
-        std::vector<std::vector<uint8_t>> PatternSpace;
-        std::vector<std::vector<double>> Heatmap;
-
+        // Aggregated statistics (mean over valid entries)
         double TotalPositive = std::numeric_limits<double>::quiet_NaN();
         double TotalNegative = std::numeric_limits<double>::quiet_NaN();
         double TotalDark     = std::numeric_limits<double>::quiet_NaN();
