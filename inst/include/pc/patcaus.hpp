@@ -209,7 +209,7 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
   return all_results;
 }
 
-} // namespace ppatcaus
+} // namespace patcaus
 
 }
 
