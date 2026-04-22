@@ -1,10 +1,18 @@
 
 #include <vector>
 #include <cmath>
-#include <algorithm>
-#include <numeric>
 #include <limits>
-#include "pc/numericutils.h"
+#include <string>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
+#include <stdexcept>
+#include <cstdint>
+#include <iterator>
+#include <random>
+#include <memory>
 #include "pc/distance.h"
 #include "pc/symdync.h"
 #include "pc/projection.h"
