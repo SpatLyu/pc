@@ -11,7 +11,7 @@
 #include <RcppThread.h>
 
 
-pc::symdync::PatternCausalityRes patcaus(
+inline pc::symdync::PatternCausalityRes patcaus(
     const std::vector<std::vector<double>>& Mx,
     const std::vector<std::vector<double>>& My,
     const std::vector<size_t>& lib_indices,
