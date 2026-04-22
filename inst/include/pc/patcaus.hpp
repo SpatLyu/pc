@@ -128,7 +128,51 @@ namespace patcaus
 
     return res;
     }
-
+    
+    /************************************************************************
+     *  Perform pattern causality analysis across multiple library sizes
+     *  and bootstrap replicates.
+     *
+     *  Parameters:
+     *      Mx, My          : Reconstructed state-space matrices
+     *      libsizes        : Vector of library sizes to evaluate
+     *      lib_indices     : Full set of candidate library indices
+     *      pred_indices    : Prediction indices
+     *      num_neighbors   : Number of nearest neighbors
+     *      zero_tolerance  : Zero-distance handling threshold
+     *      h               : Prediction horizon
+     *      dist_metric     : Distance metric
+     *      boot            : Number of bootstrap replicates
+     *      random_sample   : Whether to randomly sample library
+     *      seed            : Random seed for reproducibility
+     *      relative        : Relative symbolic encoding
+     *      weighted        : Weighted pattern comparison
+     *      threads         : Number of threads
+     *      parallel_level  : Parallelization strategy
+     *                        0 = projection-level parallelism
+     *                        1 = bootstrap-level parallelism
+     *      verbose         : Show progress bar
+     *
+     *  Returns:
+     *      3D array [3 × libsizes × boot]:
+     *          [0] Positive causality
+     *          [1] Negative causality
+     *          [2] Dark causality
+     *
+     *  Description:
+     *      This function evaluates causality robustness by:
+     *          - Varying library sizes
+     *          - Applying bootstrap resampling
+     *
+     *      For each library size:
+     *          1. Sample library indices (random or sequential)
+     *          2. Perform projection-based prediction
+     *          3. Compute symbolic pattern causality
+     *
+     *      Parallelization can be applied either:
+     *          - Inside projection (default)
+     *          - Across bootstrap replicates
+     ************************************************************************/
     inline std::vector<std::vector<std::vector<double>>> patcaus(
         const std::vector<std::vector<double>>& Mx,
         const std::vector<std::vector<double>>& My,
