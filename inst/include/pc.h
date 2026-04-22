@@ -43,6 +43,7 @@
 #include "pc/distance.hpp"
 #include "pc/symdync.hpp"
 #include "pc/projection.hpp"
+#include "pc/patcaus.hpp"
 
 // ============================================================
 // Convenience Converters (Inline helpers for R/C++ interop)
