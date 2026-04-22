@@ -171,11 +171,12 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
 
       std::vector<std::vector<double>> PredSMy;
       if (parallel_level == 0)
-        PredSMy = SignatureProjection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, threads_sizet);
+        PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, threads);
       else
-        PredSMy = SignatureProjection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, 1);
+        PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
 
-      PatternCausalityRes res = GenPatternCausality(SMx, SMy, PredSMy, weighted);
+      pc::symdync::PatternCausalityRes res = pc::symdync::computePatternCausality(
+        SMx, SMy, PredSMy, weighted);
 
       all_results[0][li][b] = res.TotalPos;
       all_results[1][li][b] = res.TotalNeg;
