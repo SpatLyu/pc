@@ -1,4 +1,7 @@
 
+#ifndef PC_PATCAUS_HPP
+#define PC_PATCAUS_HPP
+
 #include <vector>
 #include <cmath>
 #include <limits>
@@ -18,7 +21,11 @@
 #include "pc/projection.h"
 #include <RcppThread.h>
 
+namespace pc
+{
 
+namespace patcaus
+{ 
 inline pc::symdync::PatternCausalityRes patcaus(
     const std::vector<std::vector<double>>& Mx,
     const std::vector<std::vector<double>>& My,
@@ -201,3 +208,9 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
 
   return all_results;
 }
+
+} // namespace ppatcaus
+
+}
+
+#endif // PC_PATCAUS_HPP
