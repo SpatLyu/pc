@@ -97,8 +97,7 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
   // --------------------------------------------------------------------------
   // Step 1: Configure threads and random generators
   // --------------------------------------------------------------------------
-  size_t threads_sizet = static_cast<size_t>(std::abs(threads));
-  threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
+  threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
 
   // Enforce boot = 1 for deterministic sampling
   if (!random_sample) boot = 1;
@@ -117,37 +116,38 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
   std::vector<std::vector<double>> Dx(
       n_obs, std::vector<double>(n_obs, std::numeric_limits<double>::quiet_NaN()));
 
-  bool L1norm = (dist_metric == 1);
-
   auto compute_distance = [&](size_t p) {
     size_t pi = pred_indices[p];
     for (size_t li : lib_indices) {
-      double dist = CppDistance(Mx[pi], Mx[li], L1norm, true);
-      if (!std::isnan(dist)) Dx[pi][li] = dist;
+      double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true);
+      if (!std::isnan(dist)) {
+        Dx[pi][li] = dist;  // assign distance; no mirroring required
+      }
     }
   };
 
-  if (threads_sizet != 1)
+  if (threads <= 1)
     for (size_t p = 0; p < pred_indices.size(); ++p) compute_distance(p);
   else
-    RcppThread::parallelFor(0, pred_indices.size(), compute_distance, threads_sizet);
+    RcppThread::parallelFor(0, pred_indices.size(), compute_distance, threads);
 
   // --------------------------------------------------------------------------
   // Step 3: Generate signature spaces
   // --------------------------------------------------------------------------
-  std::vector<std::vector<double>> SMx = GenSignatureSpace(Mx, relative);
-  std::vector<std::vector<double>> SMy = GenSignatureSpace(My, relative);
+  std::vector<std::vector<double>> SMx = pc::symdync::genSignatureSpace(Mx, relative);
+  std::vector<std::vector<double>> SMy = pc::symdync::genSignatureSpace(My, relative);
 
   // --------------------------------------------------------------------------
   // Step 4: Initialize results container [3][libsizes][boot]
   // --------------------------------------------------------------------------
   const size_t n_libsizes = libsizes.size();
   std::vector<std::vector<std::vector<double>>> all_results(
-      3, std::vector<std::vector<double>>(n_libsizes, std::vector<double>(boot, std::numeric_limits<double>::quiet_NaN())));
+      3, std::vector<std::vector<double>>(n_libsizes, 
+        std::vector<double>(boot, std::numeric_limits<double>::quiet_NaN())));
 
   // Optional progress bar
   std::unique_ptr<RcppThread::ProgressBar> bar;
-  if (progressbar)
+  if (verbose)
     bar = std::make_unique<RcppThread::ProgressBar>(n_libsizes, 1);
 
   // --------------------------------------------------------------------------
