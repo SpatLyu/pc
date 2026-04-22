@@ -63,13 +63,13 @@ pc::symdync::PatternCausalityRes patcaus(
   // Step 3: Predict target signatures for My using local projections
   // --------------------------------------------------------------------------
   std::vector<std::vector<double>> PredSMy = pc::projection::projection(
-    SMy, Dx, lib_indices, pred_indices, num_neighbors, zero_tolerance, threads_sizet);
+    SMy, Dx, lib_indices, pred_indices, num_neighbors, zero_tolerance, threads);
 
   // --------------------------------------------------------------------------
   // Step 4: Compute pattern-based causality using symbolic pattern comparison
   // --------------------------------------------------------------------------
-  PatternCausalityRes res = pc::symdync::computePatternCausality(
-    SMx, SMy, PredSMy, weighted);
+  pc::symdync::PatternCausalityRes res = 
+    pc::symdync::computePatternCausality(SMx, SMy, PredSMy, weighted);
 
   return res;
 }
