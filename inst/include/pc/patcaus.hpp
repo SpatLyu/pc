@@ -171,7 +171,7 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
   for (size_t li = 0; li < n_libsizes; ++li) {
     size_t L = libsizes[li];
 
-    auto process_boot = [&](int b) {
+    auto process_boot = [&](size_t b) {
       std::vector<size_t> sampled_lib, sampled_pred;
 
       if (random_sample) {
@@ -199,9 +199,9 @@ inline std::vector<std::vector<std::vector<double>>> patcaus(
     };
 
     if (parallel_level != 0)
-      RcppThread::parallelFor(0, boot, process_boot, threads_sizet);
+      RcppThread::parallelFor(0, boot, process_boot, threads);
     else
-      for (int b = 0; b < boot; ++b) process_boot(b);
+      for (size_t b = 0; b < boot; ++b) process_boot(b);
 
     if (verbose) (*bar)++;
   }
