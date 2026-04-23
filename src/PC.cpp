@@ -18,11 +18,11 @@ Rcpp::List RcppPC(
     int style = 0,
     int num_neighbors = 4,
     int zero_tolerance = 0,
-    int h = 0,
     const std::string& dist_metric = "euclidean",
     bool relative = true,
     bool weighted = true,
     int threads = 1,
+    int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
