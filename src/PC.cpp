@@ -91,15 +91,7 @@ Rcpp::List RcppPC(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
     }
 
-    // Discrete lagged values for agent variables
-    for (size_t j = 0; j < lagged_values.size(); ++j)
-    {   
-        pm[j + 1] = infoxtr::discretize::discretize(
-            lagged_values[j], method_final[j], bin_final[j]
-        );
-    }  
-
-  // --- Perform Geographical Pattern Causality (GPC) -------------------------
+  // --- Perform Pattern Causality Analysis -------------------------
 
   PatternCausalityRes res = PatternCausality(
     Mx, My, lib_std, pred_std, b, zero_tolerance,
