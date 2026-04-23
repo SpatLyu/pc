@@ -39,9 +39,9 @@
 #include <iterator>
 #include <random>
 #include <memory>
-#include "pc/distance.h"
-#include "pc/symdync.h"
-#include "pc/projection.h"
+#include "pc/distance.hpp"
+#include "pc/symdync.hpp"
+#include "pc/projection.hpp"
 #include <RcppThread.h>
 
 namespace pc

@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <numeric>
 #include <limits>
-#include "pc/numericutils.h"
+#include "pc/numericutils.hpp"
 #include <RcppThread.h>
 
 namespace pc
