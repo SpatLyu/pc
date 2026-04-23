@@ -63,7 +63,6 @@ Rcpp::List RcppPC(
     std::vector<size_t> tau_std = Rcpp::as<std::vector<size_t>>(tau);
 
     // --- Embedding Construction ------------------------------------------------
-
     std::vector<std::vector<double>> Mx;
     std::vector<std::vector<double>> My;
 
@@ -98,76 +97,75 @@ Rcpp::List RcppPC(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
     }
 
-  // --- Perform Pattern Causality Analysis -------------------------
+    // --- Perform Pattern Causality Analysis -------------------------
+    pc::patcaus::PatternCausalityRes res = pc::patcaus::patcaus(
+        Mx, My, lib_std, pred_std, b, zero_tolerance,
+        dist_metric, relative, weighted, threads);
 
-  PatternCausalityRes res = PatternCausality(
-    Mx, My, lib_std, pred_std, b, zero_tolerance,
-    dist_metric, relative, weighted, threads);
+    // --- Convert result.matrice to Rcpp::NumericMatrix ------------------------
 
-  // --- Convert result.matrice to Rcpp::NumericMatrix ------------------------
-
-  size_t nrow = res.matrice.size();
-  size_t ncol = nrow > 0 ? res.matrice[0].size() : 0;
-  Rcpp::NumericMatrix matrice_mat(nrow, ncol);
-  for (size_t i = 0; i < nrow; ++i) {
-    for (size_t j = 0; j < ncol; ++j) {
-      matrice_mat(i, j) = res.matrice[i][j];
+    size_t nrow = res.matrice.size();
+    size_t ncol = nrow > 0 ? res.matrice[0].size() : 0;
+    Rcpp::NumericMatrix matrice_mat(nrow, ncol);
+    for (size_t i = 0; i < nrow; ++i) {
+        for (size_t j = 0; j < ncol; ++j) {
+        matrice_mat(i, j) = res.matrice[i][j];
+        }
     }
-  }
 
-  // Assign row and column names if available
-  if (!res.PatternStrings.empty() && res.PatternStrings.size() == nrow && res.PatternStrings.size() == ncol) {
-    Rcpp::CharacterVector diffpatternnames(res.PatternStrings.begin(), res.PatternStrings.end());
-    Rcpp::rownames(matrice_mat) = diffpatternnames;
-    Rcpp::colnames(matrice_mat) = diffpatternnames;
-  }
-
-  // --- Create DataFrame for per-sample causality ----------------------------
-
-  size_t n_samples = res.NoCausality.size();
-  Rcpp::LogicalVector real_loop(n_samples, false);
-  Rcpp::CharacterVector pattern_labels(n_samples, "no");
-
-  for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) {
-    size_t idx = res.RealLoop[rl];
-    if (idx < n_samples) {
-      // Record validated samples
-      real_loop[idx] = true;
-      // Map pattern_types (0–3) → descriptive string labels
-      switch (res.PatternTypes[rl]) {
-        case 0: pattern_labels[idx]  = "no"; break;
-        case 1: pattern_labels[idx]  = "positive"; break;
-        case 2: pattern_labels[idx]  = "negative"; break;
-        case 3: pattern_labels[idx]  = "dark"; break;
-        default: pattern_labels[idx] = "unknown"; break;
-      }
+    // Assign row and column names if available
+    if (!res.PatternStrings.empty() && res.PatternStrings.size() == nrow && res.PatternStrings.size() == ncol) {
+        Rcpp::CharacterVector diffpatternnames(res.PatternStrings.begin(), res.PatternStrings.end());
+        Rcpp::rownames(matrice_mat) = diffpatternnames;
+        Rcpp::colnames(matrice_mat) = diffpatternnames;
     }
-  }
 
-  Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
-    Rcpp::Named("no") = Rcpp::NumericVector(res.NoCausality.begin(), res.NoCausality.end()),
-    Rcpp::Named("positive") = Rcpp::NumericVector(res.PositiveCausality.begin(), res.PositiveCausality.end()),
-    Rcpp::Named("negative") = Rcpp::NumericVector(res.NegativeCausality.begin(), res.NegativeCausality.end()),
-    Rcpp::Named("dark") = Rcpp::NumericVector(res.DarkCausality.begin(), res.DarkCausality.end()),
-    Rcpp::Named("type") = pattern_labels,
-    Rcpp::Named("valid") = real_loop
-  );
+    // --- Create DataFrame for per-sample causality ----------------------------
 
-  // --- Create summary DataFrame for causal strengths ------------------------
+    size_t n_samples = res.NoCausality.size();
+    Rcpp::LogicalVector real_loop(n_samples, false);
+    Rcpp::CharacterVector pattern_labels(n_samples, "no");
 
-  Rcpp::CharacterVector causal_type = Rcpp::CharacterVector::create("positive", "negative", "dark");
-  Rcpp::NumericVector causal_strength = Rcpp::NumericVector::create(res.TotalPos, res.TotalNeg, res.TotalDark);
+    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) {
+        size_t idx = res.RealLoop[rl];
+        if (idx < n_samples) {
+        // Record validated samples
+        real_loop[idx] = true;
+        // Map pattern_types (0–3) → descriptive string labels
+        switch (res.PatternTypes[rl]) {
+            case 0: pattern_labels[idx]  = "no"; break;
+            case 1: pattern_labels[idx]  = "positive"; break;
+            case 2: pattern_labels[idx]  = "negative"; break;
+            case 3: pattern_labels[idx]  = "dark"; break;
+            default: pattern_labels[idx] = "unknown"; break;
+        }
+        }
+    }
 
-  Rcpp::DataFrame summary_df = Rcpp::DataFrame::create(
-    Rcpp::Named("type") = causal_type,
-    Rcpp::Named("strength") = causal_strength
-  );
+    Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
+        Rcpp::Named("no") = Rcpp::NumericVector(res.NoCausality.begin(), res.NoCausality.end()),
+        Rcpp::Named("positive") = Rcpp::NumericVector(res.PositiveCausality.begin(), res.PositiveCausality.end()),
+        Rcpp::Named("negative") = Rcpp::NumericVector(res.NegativeCausality.begin(), res.NegativeCausality.end()),
+        Rcpp::Named("dark") = Rcpp::NumericVector(res.DarkCausality.begin(), res.DarkCausality.end()),
+        Rcpp::Named("type") = pattern_labels,
+        Rcpp::Named("valid") = real_loop
+    );
 
-  // --- Return structured results --------------------------------------------
+    // --- Create summary DataFrame for causal strengths ------------------------
 
-  return Rcpp::List::create(
-    Rcpp::Named("causality") = causality_df,
-    Rcpp::Named("summary") = summary_df,
-    Rcpp::Named("pattern") = matrice_mat
-  );
-}
+    Rcpp::CharacterVector causal_type = Rcpp::CharacterVector::create("positive", "negative", "dark");
+    Rcpp::NumericVector causal_strength = Rcpp::NumericVector::create(res.TotalPos, res.TotalNeg, res.TotalDark);
+
+    Rcpp::DataFrame summary_df = Rcpp::DataFrame::create(
+        Rcpp::Named("type") = causal_type,
+        Rcpp::Named("strength") = causal_strength
+    );
+
+    // --- Return structured results --------------------------------------------
+
+    return Rcpp::List::create(
+        Rcpp::Named("causality") = causality_df,
+        Rcpp::Named("summary") = summary_df,
+        Rcpp::Named("pattern") = matrice_mat
+    );
+    }
