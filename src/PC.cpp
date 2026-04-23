@@ -126,17 +126,20 @@ Rcpp::List RcppPC(
 
     // --- Create DataFrame for per-sample causality ----------------------------
 
-    size_t n_samples = res.NoCausality.size();
+    const size_t n_samples = res.NoCausality.size();
     Rcpp::LogicalVector real_loop(n_samples, false);
     Rcpp::CharacterVector pattern_labels(n_samples, "no");
 
-    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) {
+    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) 
+    {
         size_t idx = res.RealLoop[rl];
-        if (idx < n_samples) {
+        if (idx < n_samples) 
+        {
             // Record validated samples
             real_loop[idx] = true;
             // Map pattern_types (0–3) → descriptive string labels
-            switch (res.PatternTypes[rl]) {
+            switch (res.PatternTypes[rl]) 
+            {
                 case 0: pattern_labels[idx]  = "no"; break;
                 case 1: pattern_labels[idx]  = "positive"; break;
                 case 2: pattern_labels[idx]  = "negative"; break;
@@ -169,7 +172,6 @@ Rcpp::List RcppPC(
 
     return Rcpp::List::create(
         Rcpp::Named("causality") = causality_df,
-        Rcpp::Named("summary") = summary_df,
-        Rcpp::Named("pattern") = matrice_mat
+        Rcpp::Named("summary") = summary_df
     );
-    }
+}
