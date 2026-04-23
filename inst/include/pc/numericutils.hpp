@@ -195,28 +195,19 @@ namespace numericutils
      *
      * @param vec Input data vector
      * @param probs Probabilities (default: {0.05, 0.5, 0.95})
-     * @param na_rm Remove NaN values if true (default)
      * @return Vector of quantiles
      */
     inline std::vector<double> quantile(
         const std::vector<double>& vec,
-        const std::vector<double>& probs = {0.05, 0.5, 0.95},
-        bool na_rm = true)
+        const std::vector<double>& probs = {0.05, 0.5, 0.95})
     {
         std::vector<double> clean_vec;
 
-        if (na_rm)
+        clean_vec.reserve(vec.size());
+        for (double v : vec)
         {
-            clean_vec.reserve(vec.size());
-            for (double v : vec)
-            {
-                if (!std::isnan(v))
-                    clean_vec.push_back(v);
-            }
-        }
-        else
-        {
-            clean_vec = vec;
+            if (!std::isnan(v))
+                clean_vec.push_back(v);
         }
 
         if (clean_vec.empty())
