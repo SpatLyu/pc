@@ -106,24 +106,6 @@ Rcpp::List RcppPC(
         dist_metric, relative, weighted,
         static_cast<size_t>(std::abs(threads)));
 
-    // --- Convert result.matrice to Rcpp::NumericMatrix ------------------------
-
-    size_t nrow = res.matrice.size();
-    size_t ncol = nrow > 0 ? res.matrice[0].size() : 0;
-    Rcpp::NumericMatrix matrice_mat(nrow, ncol);
-    for (size_t i = 0; i < nrow; ++i) {
-        for (size_t j = 0; j < ncol; ++j) {
-        matrice_mat(i, j) = res.matrice[i][j];
-        }
-    }
-
-    // Assign row and column names if available
-    if (!res.PatternStrings.empty() && res.PatternStrings.size() == nrow && res.PatternStrings.size() == ncol) {
-        Rcpp::CharacterVector diffpatternnames(res.PatternStrings.begin(), res.PatternStrings.end());
-        Rcpp::rownames(matrice_mat) = diffpatternnames;
-        Rcpp::colnames(matrice_mat) = diffpatternnames;
-    }
-
     // --- Create DataFrame for per-sample causality ----------------------------
 
     const size_t n_samples = res.NoCausality.size();
