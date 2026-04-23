@@ -251,34 +251,37 @@ namespace patcaus
     // --------------------------------------------------------------------------
     // Step 5: Iterate over library sizes
     // --------------------------------------------------------------------------
-    for (size_t li = 0; li < n_libsizes; ++li) {
+    for (size_t li = 0; li < n_libsizes; ++li) 
+    {
         size_t L = libsizes[li];
 
-        auto process_boot = [&](size_t b) {
-        std::vector<size_t> sampled_lib, sampled_pred;
+        auto process_boot = [&](size_t b) 
+        {
+            std::vector<size_t> sampled_lib, sampled_pred;
 
-        if (random_sample) {
-            std::vector<size_t> shuffled_lib = lib_indices;
-            std::shuffle(shuffled_lib.begin(), shuffled_lib.end(), rng_pool[b]);
-            sampled_lib.assign(shuffled_lib.begin(), shuffled_lib.begin() + L);
-            // sampled_pred = sampled_lib;
-        } else {
-            sampled_lib.assign(lib_indices.begin(), lib_indices.begin() + L);
-            // sampled_pred = sampled_lib;
-        }
+            if (random_sample) 
+            {
+                std::vector<size_t> shuffled_lib = lib_indices;
+                std::shuffle(shuffled_lib.begin(), shuffled_lib.end(), rng_pool[b]);
+                sampled_lib.assign(shuffled_lib.begin(), shuffled_lib.begin() + L);
+                // sampled_pred = sampled_lib;
+            } else {
+                sampled_lib.assign(lib_indices.begin(), lib_indices.begin() + L);
+                // sampled_pred = sampled_lib;
+            }
 
-        std::vector<std::vector<double>> PredSMy;
-        if (parallel_level == 0)
-            PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, threads);
-        else
-            PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
+            std::vector<std::vector<double>> PredSMy;
+            if (parallel_level == 0)
+                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, threads);
+            else
+                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
 
-        pc::symdync::PatternCausalityRes res = pc::symdync::computePatternCausality(
-            SMx, SMy, PredSMy, weighted);
+            pc::symdync::PatternCausalityRes res = pc::symdync::computePatternCausality(
+                SMx, SMy, PredSMy, weighted);
 
-        all_results[0][li][b] = res.TotalPos;
-        all_results[1][li][b] = res.TotalNeg;
-        all_results[2][li][b] = res.TotalDark;
+            all_results[0][li][b] = res.TotalPos;
+            all_results[1][li][b] = res.TotalNeg;
+            all_results[2][li][b] = res.TotalDark;
         };
 
         if (parallel_level != 0)
