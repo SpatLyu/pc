@@ -16,8 +16,6 @@
  *
  *       Supports multiple probability inputs and linear interpolation.
  *
- * Intended for scientific computation where double precision stability matters.
- *
  * Author: Wenbo Lyu (Github: @SpatLyu)
  * License: GPL-3
  ********************************************************************************/
