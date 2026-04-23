@@ -26,44 +26,76 @@ Rcpp::List RcppPC(
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
-  // --- Input Conversion and Validation --------------------------------------
+    // --- Input Conversion and Validation --------------------------------------
 
-  std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
-  std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
-  const size_t n_obs = tg.size();
+    std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
+    std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
+    const size_t n_obs = tg.size();
 
-  // Convert library indices (R 1-based → C++ 0-based)
-  const size_t n_lib = static_cast<size_t>(lib.size());
-  std::vector<size_t> lib_std;
-  lib_std.reserve(n_lib);
-  for (size_t i = 0; i < n_lib; ++i) {
-    if (lib[i] < 1 || lib[i] > n_obs)
-      Rcpp::stop("lib contains out-of-bounds index at position %d (value: %d)", 
-                 static_cast<int>(i + 1), lib[i]);
-    if (!std::isnan(tg[lib[i] - 1]) && !std::isnan(sg[lib[i] - 1]))
-      lib_std.push_back(static_cast<size_t>(lib[i] - 1));
-  }
+    // Convert library indices (R 1-based → C++ 0-based)
+    const size_t n_lib = static_cast<size_t>(lib.size());
+    std::vector<size_t> lib_std;
+    lib_std.reserve(n_lib);
+    for (size_t i = 0; i < n_lib; ++i) 
+    {
+        if (lib[i] < 1 || lib[i] > n_obs)
+            Rcpp::stop("lib contains out-of-bounds index at position %d (value: %d)", 
+                        static_cast<int>(i + 1), lib[i]);
+        if (!std::isnan(tg[lib[i] - 1]) && !std::isnan(sg[lib[i] - 1]))
+            lib_std.push_back(static_cast<size_t>(lib[i] - 1));
+    }
 
-  // Convert prediction indices (R 1-based → C++ 0-based)
-  const size_t n_pred = static_cast<size_t>(n_pred.size());
-  std::vector<size_t> pred_std;
-  pred_std.reserve(n_pred);
-  for (int i = 0; i < n_pred; ++i) {
-    if (pred[i] < 1 || pred[i] > n_obs)
-      Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", 
-                 static_cast<int>(i + 1), pred[i]);
-    if (!std::isnan(tg[pred[i] - 1]) && !std::isnan(sg[pred[i] - 1]))
-      pred_std.push_back(static_cast<size_t>(pred[i] - 1));
-  }
+    // Convert prediction indices (R 1-based → C++ 0-based)
+    const size_t n_pred = static_cast<size_t>(n_pred.size());
+    std::vector<size_t> pred_std;
+    pred_std.reserve(n_pred);
+    for (int i = 0; i < n_pred; ++i) 
+    {
+        if (pred[i] < 1 || pred[i] > n_obs)
+            Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", 
+                        static_cast<int>(i + 1), pred[i]);
+        if (!std::isnan(tg[pred[i] - 1]) && !std::isnan(sg[pred[i] - 1]))
+            pred_std.push_back(static_cast<size_t>(pred[i] - 1));
+    }
 
-  // Convert Rcpp IntegerVector to std::vector<int>
-  std::vector<int> E_std = Rcpp::as<std::vector<int>>(E);
-  std::vector<int> tau_std = Rcpp::as<std::vector<int>>(tau);
+    // Convert Rcpp IntegerVector to std::vector<size_t>
+    std::vector<size_t> E_std = Rcpp::as<std::vector<size_t>>(E);
+    std::vector<size_t> tau_std = Rcpp::as<std::vector<size_t>>(tau);
 
-  // --- Embedding Construction ------------------------------------------------
+    // --- Embedding Construction ------------------------------------------------
 
-  std::vector<std::vector<double>> Mx = GenLatticeEmbeddings(x_std, nb_vec, E_std[0], tau_std[0], style);
-  std::vector<std::vector<double>> My = GenLatticeEmbeddings(y_std, nb_vec, E_std[1], tau_std[1], style);
+    std::vector<std::vector<double>> Mx;
+    std::vector<std::vector<double>> My;
+
+    if (nb.isNotNull()) 
+        {
+        // Convert Rcpp::List to std::vector<std::vector<size_t>>
+        std::vector<std::vector<size_t>> nb_std = pc::convert::nb2std(nb.get());
+        Mx = pc::embed::embed(
+            tg, nb_std, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+        My = pc::embed::embed(
+            sg, nb_std, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+    } 
+    else if (nrows.isNotNull())
+    {
+        lagged_values = infoxtr::lagg::lagg(
+            cppMat, 
+            static_cast<size_t>(std::abs(Rcpp::as<int>(nrows))), 
+            static_cast<size_t>(std::abs(lag)), false);
+    }
+    else  
+    {
+        lagged_values = infoxtr::lagg::lagg(
+            cppMat, static_cast<size_t>(std::abs(lag)), false);
+    }
+
+    // Discrete lagged values for agent variables
+    for (size_t j = 0; j < lagged_values.size(); ++j)
+    {   
+        pm[j + 1] = infoxtr::discretize::discretize(
+            lagged_values[j], method_final[j], bin_final[j]
+        );
+    }  
 
   // --- Perform Geographical Pattern Causality (GPC) -------------------------
 
