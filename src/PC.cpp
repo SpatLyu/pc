@@ -33,29 +33,27 @@ Rcpp::List RcppPC(
     const size_t n_obs = tg.size();
 
     // Convert library indices (R 1-based → C++ 0-based)
-    const size_t n_lib = static_cast<size_t>(lib.size());
-    std::vector<size_t> lib_std;
-    lib_std.reserve(n_lib);
-    for (size_t i = 0; i < n_lib; ++i) 
+    std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
+    for (auto& idx : lib_std) 
     {
-        if (lib[i] < 1 || lib[i] > n_obs)
-            Rcpp::stop("lib contains out-of-bounds index at position %d (value: %d)", 
-                        static_cast<int>(i + 1), lib[i]);
-        if (!std::isnan(tg[lib[i] - 1]) && !std::isnan(sg[lib[i] - 1]))
-            lib_std.push_back(static_cast<size_t>(lib[i] - 1));
+        if (idx < 1 || idx > n_obs) {
+            Rcpp::stop("lib index %d out of bounds [1, %d]",
+                       static_cast<int>(idx),
+                       static_cast<int>(n_obs));
+        }
+        idx -= 1;
     }
 
     // Convert prediction indices (R 1-based → C++ 0-based)
-    const size_t n_pred = static_cast<size_t>(pred.size());
-    std::vector<size_t> pred_std;
-    pred_std.reserve(n_pred);
-    for (size_t i = 0; i < n_pred; ++i) 
+    std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
+    for (auto& idx : pred_std) 
     {
-        if (pred[i] < 1 || pred[i] > n_obs)
-            Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", 
-                        static_cast<int>(i + 1), pred[i]);
-        if (!std::isnan(tg[pred[i] - 1]) && !std::isnan(sg[pred[i] - 1]))
-            pred_std.push_back(static_cast<size_t>(pred[i] - 1));
+        if (idx < 1 || idx > n_obs) {
+            Rcpp::stop("pred index %d out of bounds [1, %d]",
+                       static_cast<int>(idx),
+                       static_cast<int>(n_obs));
+        }
+        idx -= 1;
     }
 
     // Convert Rcpp IntegerVector to std::vector<size_t>
