@@ -36,21 +36,23 @@ Rcpp::List RcppPC(
   const size_t n_lib = static_cast<size_t>(lib.size());
   std::vector<size_t> lib_std;
   lib_std.reserve(n_lib);
-  for (int i = 0; i < lib.size(); ++i) {
-    if (lib[i] < 1 || lib[i] > validSampleNum)
-      Rcpp::stop("lib contains out-of-bounds index at position %d (value: %d)", i + 1, lib[i]);
-    if (!std::isnan(x_std[lib[i] - 1]) && !std::isnan(y_std[lib[i] - 1]))
+  for (size_t i = 0; i < n_lib; ++i) {
+    if (lib[i] < 1 || lib[i] > n_obs)
+      Rcpp::stop("lib contains out-of-bounds index at position %d (value: %d)", 
+                 static_cast<int>(i + 1), lib[i]);
+    if (!std::isnan(tg[lib[i] - 1]) && !std::isnan(sg[lib[i] - 1]))
       lib_std.push_back(static_cast<size_t>(lib[i] - 1));
   }
 
   // Convert prediction indices (R 1-based → C++ 0-based)
   const size_t n_pred = static_cast<size_t>(n_pred.size());
   std::vector<size_t> pred_std;
-  pred_std.reserve(pred.size());
-  for (int i = 0; i < pred.size(); ++i) {
-    if (pred[i] < 1 || pred[i] > validSampleNum)
-      Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", i + 1, pred[i]);
-    if (!std::isnan(x_std[pred[i] - 1]) && !std::isnan(y_std[pred[i] - 1]))
+  pred_std.reserve(n_pred);
+  for (int i = 0; i < n_pred; ++i) {
+    if (pred[i] < 1 || pred[i] > n_obs)
+      Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", 
+                 static_cast<int>(i + 1), pred[i]);
+    if (!std::isnan(tg[pred[i] - 1]) && !std::isnan(sg[pred[i] - 1]))
       pred_std.push_back(static_cast<size_t>(pred[i] - 1));
   }
 
