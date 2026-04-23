@@ -161,11 +161,9 @@ namespace numericutils
      * @brief Compute mean of a numeric vector.
      *
      * @param vec Input vector
-     * @param na_rm Remove NaN values if true (default)
      * @return Mean value (NaN if no valid data)
      */
-    inline double mean(const std::vector<double>& vec,
-                       bool na_rm = true) noexcept
+    inline double mean(const std::vector<double>& vec) noexcept
     {
         if (vec.empty())
             return std::numeric_limits<double>::quiet_NaN();
@@ -173,24 +171,10 @@ namespace numericutils
         double sum = 0.0;
         size_t count = 0;
 
-        if (na_rm)
+        for (double v : vec)
         {
-            for (double v : vec)
+            if (!std::isnan(v))
             {
-                if (!std::isnan(v))
-                {
-                    sum += v;
-                    ++count;
-                }
-            }
-        }
-        else
-        {
-            for (double v : vec)
-            {
-                if (std::isnan(v))
-                    return std::numeric_limits<double>::quiet_NaN();
-
                 sum += v;
                 ++count;
             }
