@@ -49,7 +49,7 @@ Rcpp::List RcppPC(
     const size_t n_pred = static_cast<size_t>(n_pred.size());
     std::vector<size_t> pred_std;
     pred_std.reserve(n_pred);
-    for (int i = 0; i < n_pred; ++i) 
+    for (size_t i = 0; i < n_pred; ++i) 
     {
         if (pred[i] < 1 || pred[i] > n_obs)
             Rcpp::stop("pred contains out-of-bounds index at position %d (value: %d)", 

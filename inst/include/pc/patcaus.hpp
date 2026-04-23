@@ -285,9 +285,9 @@ namespace patcaus
         };
 
         if (parallel_level != 0)
-        RcppThread::parallelFor(0, boot, process_boot, threads);
+            RcppThread::parallelFor(0, boot, process_boot, threads);
         else
-        for (size_t b = 0; b < boot; ++b) process_boot(b);
+            for (size_t b = 0; b < boot; ++b) process_boot(b);
 
         if (verbose) (*bar)++;
     }
