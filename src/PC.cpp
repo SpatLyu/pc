@@ -126,24 +126,17 @@ Rcpp::List RcppPC(
             ? (max_E - 1)
             : ((max_E - 1) * max_tau);
 
-        auto filter_indices = [&](std::vector<size_t>& indices)
-        {
-            std::vector<size_t> filtered;
-            filtered.reserve(indices.size());
+        lib_std.erase(
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            lib_std.end()
+        );
 
-            for (size_t idx : indices)
-            {
-                if (idx + 1 > max_lag)
-                {
-                    filtered.push_back(idx);
-                }
-            }
-
-            indices.swap(filtered);
-        };
-
-        filter_indices(lib_std);
-        filter_indices(pred_std);
+        pred_std.erase(
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            pred_std.end()
+        );
     }
 
     // --- Perform Pattern Causality Analysis -------------------------
@@ -333,24 +326,17 @@ Rcpp::DataFrame RcppPCboot(
             ? (max_E - 1)
             : ((max_E - 1) * max_tau);
 
-        auto filter_indices = [&](std::vector<size_t>& indices)
-        {
-            std::vector<size_t> filtered;
-            filtered.reserve(indices.size());
+        lib_std.erase(
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            lib_std.end()
+        );
 
-            for (size_t idx : indices)
-            {
-                if (idx + 1 > max_lag)
-                {
-                    filtered.push_back(idx);
-                }
-            }
-
-            indices.swap(filtered);
-        };
-
-        filter_indices(lib_std);
-        filter_indices(pred_std);
+        pred_std.erase(
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx + 1 < max_lag; }),
+            pred_std.end()
+        );
     }
 
     // Validate and preprocess library sizes
