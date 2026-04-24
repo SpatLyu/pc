@@ -332,54 +332,91 @@ Rcpp::DataFrame RcppPCboot(
         static_cast<size_t>(std::abs(parallel_level)),
         verbose);
 
-    // --- Create DataFrame for per-sample causality ----------------------------
+    // --- Result Processing -----------------------------------------------------
 
-    const size_t n_samples = res.NoCausality.size();
-    Rcpp::LogicalVector real_loop(n_samples, false);
-    Rcpp::CharacterVector pattern_labels(n_samples, "no");
+    // res structure: [3][valid_libsizes][boot]
+    // dimension 0: metric type (0=TotalPos,1=TotalNeg,2=TotalDark)
+    // dimension 1: libsizes index
+    // dimension 2: bootstrap replicates
 
-    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) 
+    int n_types = 3;
+    int n_libsizes = static_cast<int>(valid_libsizes.size());
+    int n_boot = static_cast<int>(res[0][0].size());
+
+    // Prepare vectors to hold dataframe columns
+    std::vector<size_t> df_libsizes;
+    std::vector<std::string> df_type;
+    std::vector<double> df_causality;
+    std::vector<double> df_q05, df_q50, df_q95;  // For quantiles if boot > 1
+
+    bool has_bootstrap = (n_boot > 1);
+    const std::string types[3] = {"positive", "negative", "dark"};
+
+    if (!has_bootstrap) 
     {
-        size_t idx = res.RealLoop[rl];
-        if (idx < n_samples) 
+        // boot == 1, simple long format: columns = libsizes, type, causality
+        df_libsizes.reserve(n_types * n_libsizes);
+        df_type.reserve(n_types * n_libsizes);
+        df_causality.reserve(n_types * n_libsizes);
+
+        for (int t = 0; t < n_types; ++t) 
         {
-            // Record validated samples
-            real_loop[idx] = true;
-            // Map pattern_types (0–3) → descriptive string labels
-            switch (res.PatternTypes[rl]) 
+            for (int l = 0; l < n_libsizes; ++l) 
             {
-                case 0: pattern_labels[idx]  = "no"; break;
-                case 1: pattern_labels[idx]  = "positive"; break;
-                case 2: pattern_labels[idx]  = "negative"; break;
-                case 3: pattern_labels[idx]  = "dark"; break;
-                default: pattern_labels[idx] = "unknown"; break;
+                df_libsizes.push_back(valid_libsizes[l]);
+                df_type.push_back(types[t]);
+                if(std::isnan(res[t][l][0])) res[t][l][0] = 0; // replace nan causal strength with 0
+                df_causality.push_back(res[t][l][0]);
             }
         }
+
+        return Rcpp::DataFrame::create(
+            Rcpp::Named("libsizes") = df_libsizes,
+            Rcpp::Named("type") = df_type,
+            Rcpp::Named("causality") = df_causality
+        );
+    } 
+    else 
+    {
+        // boot > 1, summary with mean and quantiles
+        df_libsizes.reserve(n_types * n_libsizes);
+        df_type.reserve(n_types * n_libsizes);
+        df_causality.reserve(n_types * n_libsizes);
+        df_q05.reserve(n_types * n_libsizes);
+        df_q50.reserve(n_types * n_libsizes);
+        df_q95.reserve(n_types * n_libsizes);
+
+        for (int t = 0; t < n_types; ++t)
+        {
+            for (int l = 0; l < n_libsizes; ++l) 
+            {
+                const std::vector<double>& boot_vals = res[t][l];
+                double mean_val = pc::numericutils::mean(boot_vals);
+                std::vector<double> qs = pc::numericutils::quantile(boot_vals, {0.05, 0.5, 0.95});
+
+                // replace nan causal strength with 0
+                if(std::isnan(mean_val)) mean_val = 0;
+                for(double& q : qs)
+                {
+                    if(std::isnan(q)) q = 0;
+                }
+
+                df_libsizes.push_back(valid_libsizes[l]);
+                df_type.push_back(types[t]);
+                df_causality.push_back(mean_val);
+                df_q05.push_back(qs[0]);
+                df_q50.push_back(qs[1]);
+                df_q95.push_back(qs[2]);
+            }
+        }
+
+        return Rcpp::DataFrame::create(
+            Rcpp::Named("libsizes") = df_libsizes,
+            Rcpp::Named("type") = df_type,
+            Rcpp::Named("mean") = df_causality,
+            Rcpp::Named("q05") = df_q05,
+            Rcpp::Named("q50") = df_q50,
+            Rcpp::Named("q95") = df_q95
+        );
     }
-
-    Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
-        Rcpp::Named("no") = Rcpp::NumericVector(res.NoCausality.begin(), res.NoCausality.end()),
-        Rcpp::Named("positive") = Rcpp::NumericVector(res.PositiveCausality.begin(), res.PositiveCausality.end()),
-        Rcpp::Named("negative") = Rcpp::NumericVector(res.NegativeCausality.begin(), res.NegativeCausality.end()),
-        Rcpp::Named("dark") = Rcpp::NumericVector(res.DarkCausality.begin(), res.DarkCausality.end()),
-        Rcpp::Named("type") = pattern_labels,
-        Rcpp::Named("valid") = real_loop
-    );
-
-    // --- Create summary DataFrame for causal strengths ------------------------
-
-    Rcpp::CharacterVector causal_type = Rcpp::CharacterVector::create("positive", "negative", "dark");
-    Rcpp::NumericVector causal_strength = Rcpp::NumericVector::create(res.TotalPos, res.TotalNeg, res.TotalDark);
-
-    Rcpp::DataFrame summary_df = Rcpp::DataFrame::create(
-        Rcpp::Named("type") = causal_type,
-        Rcpp::Named("strength") = causal_strength
-    );
-
-    // --- Return structured results --------------------------------------------
-
-    return Rcpp::List::create(
-        Rcpp::Named("causality") = causality_df,
-        Rcpp::Named("summary") = summary_df
-    );
 }
