@@ -301,6 +301,31 @@ Rcpp::DataFrame RcppPCboot(
             tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
         My = pc::embed::embed(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+
+        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
+        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
+        size_t max_lag = (max_tau == 0) 
+            ? (max_E - 1)
+            : ((max_E - 1) * max_tau);
+
+        auto filter_indices = [&](std::vector<size_t>& indices)
+        {
+            std::vector<size_t> filtered;
+            filtered.reserve(indices.size());
+
+            for (size_t idx : indices)
+            {
+                if (idx + 1 > max_lag)
+                {
+                    filtered.push_back(idx);
+                }
+            }
+
+            indices.swap(filtered);
+        };
+
+        filter_indices(lib_std);
+        filter_indices(pred_std);
     }
 
     // Validate and preprocess library sizes
