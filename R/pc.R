@@ -35,12 +35,12 @@
   if (is.null(pred)) pred = lib
   
   if (is.null(libsizes)) {
-    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance, dist.metric))
+    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance, dist.metric,
+                  relative, weighted, threads, 0, NULL, terra::nrow(data)))
   } else {
-
+    return(RcppPCboot(tv, sv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot, random, 
+                      seed, relative, weighted, threads, lower.parallel, verbose, 0, NULL, terra::nrow(data)))
   }
-  return(RcppSURD(mat, abs(target), abs(agent), lag, max.order, threads, base, 
-                  normalize, abs(bin), method, NULL, terra::nrow(data[[1]])))
 }
 
 #' SURD
