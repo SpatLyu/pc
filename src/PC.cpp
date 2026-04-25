@@ -216,7 +216,7 @@ Rcpp::DataFrame RcppPCboot(
     const std::string& dist_metric = "euclidean",
     int boot = 99,
     bool random_sample = true,
-    unsigned long long seed = 42,
+    int seed = 42,
     bool relative = true,
     bool weighted = true,
     int threads = 1,
@@ -362,11 +362,10 @@ Rcpp::DataFrame RcppPCboot(
         static_cast<size_t>(std::abs(num_neighbors)),
         static_cast<size_t>(std::abs(zero_tolerance)),
         static_cast<size_t>(std::abs(h)), dist_metric, 
-        static_cast<size_t>(std::abs(boot)),
-        random_sample, relative, weighted,
-        static_cast<size_t>(std::abs(threads)),
-        static_cast<size_t>(std::abs(parallel_level)),
-        verbose);
+        static_cast<size_t>(std::abs(boot)), random_sample, 
+        static_cast<unsigned long long>(std::abs(seed)),
+        relative, weighted, static_cast<size_t>(std::abs(threads)),
+        static_cast<size_t>(std::abs(parallel_level)), verbose);
 
     // --- Result Processing -----------------------------------------------------
 
