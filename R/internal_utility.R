@@ -13,8 +13,8 @@
   }
 
   res = vector("list", 2)
-  res[[1]] = mat[, target, drop = TRUE]
-  res[[2]] = mat[, source, drop = TRUE]
+  res[[1]] = mat[, abs(target[1]), drop = TRUE]
+  res[[2]] = mat[, abs(source[1]), drop = TRUE]
   
   return(res)
 }
