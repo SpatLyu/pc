@@ -13,7 +13,7 @@
   source,
   libsizes = NULL,
   E = 3,
-  k = E + 2,
+  k = E + 1,
   tau = 1,
   style = 1,
   lib = NULL,
