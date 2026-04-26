@@ -509,6 +509,13 @@ Rcpp::List RcppPCops(
         idx -= 1;
     }
 
+    // Convert Rcpp::List to std::vector<std::vector<size_t>>
+    std::vector<std::vector<size_t>> nb_std;
+    if (nb.isNotNull()) 
+    {
+        nb_std = pc::convert::nb2std(nb.get());
+    }
+
     // Unique sorted embedding dimensions, neighbor values, and tau values
     std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
     std::sort(Es.begin(), Es.end());
@@ -531,26 +538,76 @@ Rcpp::List RcppPCops(
 
     std::vector<std::vector<double>> result(unique_EbTau.size(), std::vector<double>(6));
 
-    if (parallel_level == 0){
+    if (parallel_level == 0) {
         for (size_t i = 0; i < unique_EbTau.size(); ++i) {
-        const int Ei   = std::get<0>(unique_EbTau[i]);
-        const int bi   = std::get<1>(unique_EbTau[i]);
-        const int taui = std::get<2>(unique_EbTau[i]);
-        // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
+            const int Ei   = std::get<0>(unique_EbTau[i]);
+            const int bi   = std::get<1>(unique_EbTau[i]);
+            const int taui = std::get<2>(unique_EbTau[i]);
+            // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
 
-        auto Mx = GenLatticeEmbeddings(source, nb_vec, Ei, taui, style);
-        auto My = GenLatticeEmbeddings(target, nb_vec, Ei, taui, style);
+            // --- Embedding Construction ------------------------------------------------
+            std::vector<std::vector<double>> Mx;
+            std::vector<std::vector<double>> My;
 
-        PatternCausalityRes res = PatternCausality(
-            Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
-            dist_metric, relative, weighted, threads);
+            if (nb.isNotNull()) 
+            {
+                // Convert Rcpp::List to std::vector<std::vector<size_t>>
+                std::vector<std::vector<size_t>> nb_std = pc::convert::nb2std(nb.get());
+                Mx = pc::embed::embed(
+                    tg, nb_std, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, nb_std, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+            } 
+            else if (nrows.isNotNull())
+            {   
+                size_t n_rows = static_cast<size_t>(std::abs(Rcpp::as<int>(nrows)));
 
-        result[i][0] = Ei;
-        result[i][1] = bi;
-        result[i][2] = taui;
-        result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
-        result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
-        result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+                std::vector<std::vector<double>> tm = 
+                    pc::embed::gridVec2Mat(tg, n_rows);
+                Mx = pc::embed::embed(
+                    tm, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+
+                std::vector<std::vector<double>> sm = 
+                    pc::embed::gridVec2Mat(sg, n_rows);
+                My = pc::embed::embed(
+                    sm, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+            }
+            else  
+            {
+                Mx = pc::embed::embed(
+                    tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+                My = pc::embed::embed(
+                    sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+
+                size_t max_E = *std::max_element(E_std.begin(), E_std.end());
+                size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
+                size_t max_lag = (max_tau == 0) 
+                    ? (max_E - 1)
+                    : ((max_E - 1) * max_tau);
+
+                lib_std.erase(
+                    std::remove_if(lib_std.begin(), lib_std.end(), 
+                        [&](size_t idx){ return idx + 1 < max_lag; }),
+                    lib_std.end()
+                );
+
+                pred_std.erase(
+                    std::remove_if(pred_std.begin(), pred_std.end(), 
+                        [&](size_t idx){ return idx + 1 < max_lag; }),
+                    pred_std.end()
+                );
+            }
+
+            PatternCausalityRes res = PatternCausality(
+                Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
+                dist_metric, relative, weighted, threads);
+
+            result[i][0] = Ei;
+            result[i][1] = bi;
+            result[i][2] = taui;
+            result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+            result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+            result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
         }
     } else {
         // Configure threads
@@ -577,59 +634,6 @@ Rcpp::List RcppPCops(
         result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
         result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
         }, threads_sizet);
-    }
-
-    // --- Embedding Construction ------------------------------------------------
-    std::vector<std::vector<double>> Mx;
-    std::vector<std::vector<double>> My;
-
-    if (nb.isNotNull()) 
-    {
-        // Convert Rcpp::List to std::vector<std::vector<size_t>>
-        std::vector<std::vector<size_t>> nb_std = pc::convert::nb2std(nb.get());
-        Mx = pc::embed::embed(
-            tg, nb_std, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-        My = pc::embed::embed(
-            sg, nb_std, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
-    } 
-    else if (nrows.isNotNull())
-    {   
-        size_t n_rows = static_cast<size_t>(std::abs(Rcpp::as<int>(nrows)));
-
-        std::vector<std::vector<double>> tm = 
-            pc::embed::gridVec2Mat(tg, n_rows);
-        Mx = pc::embed::embed(
-            tm, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-
-        std::vector<std::vector<double>> sm = 
-            pc::embed::gridVec2Mat(sg, n_rows);
-        My = pc::embed::embed(
-            sm, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
-    }
-    else  
-    {
-        Mx = pc::embed::embed(
-            tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-        My = pc::embed::embed(
-            sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
-
-        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
-        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
-        size_t max_lag = (max_tau == 0) 
-            ? (max_E - 1)
-            : ((max_E - 1) * max_tau);
-
-        lib_std.erase(
-            std::remove_if(lib_std.begin(), lib_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            lib_std.end()
-        );
-
-        pred_std.erase(
-            std::remove_if(pred_std.begin(), pred_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            pred_std.end()
-        );
     }
 
     // --- Perform Pattern Causality Analysis -------------------------
