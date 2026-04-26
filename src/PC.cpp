@@ -508,9 +508,25 @@ Rcpp::List RcppPCops(
         idx -= 1;
     }
 
-    // Convert Rcpp IntegerVector to std::vector<size_t>
-    std::vector<size_t> E_std = Rcpp::as<std::vector<size_t>>(E);
-    std::vector<size_t> tau_std = Rcpp::as<std::vector<size_t>>(tau);
+    // Unique sorted embedding dimensions, neighbor values, and tau values
+    std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
+    std::sort(Es.begin(), Es.end());
+    Es.erase(std::unique(Es.begin(), Es.end()), Es.end());
+
+    std::vector<size_t> ks = Rcpp::as<std::vector<size_t>>(k);
+    std::sort(ks.begin(), ks.end());
+    ks.erase(std::unique(ks.begin(), ks.end()), ks.end());
+
+    std::vector<size_t> taus = Rcpp::as<std::vector<size_t>>(tau);
+    std::sort(taus.begin(), taus.end());
+    taus.erase(std::unique(taus.begin(), taus.end()), taus.end());
+
+    // Generate unique (E, b, tau) combinations
+    std::vector<std::tuple<size_t, size_t, size_t>> unique_EbTau;
+    for (size_t ee : Es)
+        for (size_t kk : bs)
+        for (size_t tt : taus)
+            unique_EbTau.emplace_back(ee, kk, tt);
 
     // --- Embedding Construction ------------------------------------------------
     std::vector<std::vector<double>> Mx;
