@@ -24,7 +24,7 @@
   if (is.null(pred)) pred = lib
 
   return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance,
-                   dist.metric, relative, weighted, threads, lower.parallel, h, nb, NULL))
+                   dist.metric, relative, weighted, threads, lower.parallel, 0, nb, NULL))
 }
 
 .ops_grid = \(data, target, source, E = 3, k = E+2, tau = 1, style = 1, lib = NULL, pred = NULL,
@@ -38,7 +38,7 @@
   if (is.null(pred)) pred = lib
 
   return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance, dist.metric, 
-                   relative, weighted, threads, lower.parallel, h, NULL, terra::nrow(data)))
+                   relative, weighted, threads, lower.parallel, 0, NULL, terra::nrow(data)))
 }
 
 #' Optimal Parameter Search for Pattern Causality
