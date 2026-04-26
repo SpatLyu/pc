@@ -530,20 +530,20 @@ Rcpp::List RcppPCops(
     taus.erase(std::unique(taus.begin(), taus.end()), taus.end());
 
     // Generate unique (E, b, tau) combinations
-    std::vector<std::tuple<size_t, size_t, size_t>> unique_EbTau;
+    std::vector<std::tuple<size_t, size_t, size_t>> unique_EkTau;
     for (size_t ee : Es)
-        for (size_t kk : bs)
+        for (size_t kk : ks)
         for (size_t tt : taus)
-            unique_EbTau.emplace_back(ee, kk, tt);
+            unique_EkTau.emplace_back(ee, kk, tt);
 
-    std::vector<std::vector<double>> result(unique_EbTau.size(), std::vector<double>(6));
+    std::vector<std::vector<double>> result(unique_EkTau.size(), std::vector<double>(6));
 
     if (parallel_level == 0) {
-        for (size_t i = 0; i < unique_EbTau.size(); ++i) {
-            const int Ei   = std::get<0>(unique_EbTau[i]);
-            const int bi   = std::get<1>(unique_EbTau[i]);
-            const int taui = std::get<2>(unique_EbTau[i]);
-            // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
+        for (size_t i = 0; i < unique_EkTau.size(); ++i) {
+            const size_t Ei   = std::get<0>(unique_EkTau[i]);
+            const size_t bi   = std::get<1>(unique_EkTau[i]);
+            const size_t taui = std::get<2>(unique_EkTau[i]);
+            // auto [Ei, ki, taui] = unique_EkTau[i]; // C++17 structured binding
 
             // --- Embedding Construction ------------------------------------------------
             std::vector<std::vector<double>> Mx;
@@ -551,8 +551,6 @@ Rcpp::List RcppPCops(
 
             if (nb.isNotNull()) 
             {
-                // Convert Rcpp::List to std::vector<std::vector<size_t>>
-                std::vector<std::vector<size_t>> nb_std = pc::convert::nb2std(nb.get());
                 Mx = pc::embed::embed(
                     tg, nb_std, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
                 My = pc::embed::embed(
@@ -603,7 +601,7 @@ Rcpp::List RcppPCops(
                 dist_metric, relative, weighted, threads);
 
             result[i][0] = Ei;
-            result[i][1] = bi;
+            result[i][1] = ki;
             result[i][2] = taui;
             result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
             result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
@@ -614,26 +612,26 @@ Rcpp::List RcppPCops(
         size_t threads_sizet = static_cast<size_t>(std::abs(threads));
         threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
 
-        RcppThread::parallelFor(0, unique_EbTau.size(), [&](size_t i) {
-        const int Ei   = std::get<0>(unique_EbTau[i]);
-        const int bi   = std::get<1>(unique_EbTau[i]);
-        const int taui = std::get<2>(unique_EbTau[i]);
-        // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
+        RcppThread::parallelFor(0, unique_EkTau.size(), [&](size_t i) {
+            const size_t Ei   = std::get<0>(unique_EkTau[i]);
+            const size_t ki   = std::get<1>(unique_EkTau[i]);
+            const size_t taui = std::get<2>(unique_EkTau[i]);
+            // auto [Ei, ki, taui] = unique_EkTau[i]; // C++17 structured binding
 
-        auto Mx = GenLatticeEmbeddings(source, nb_vec, Ei, taui, style);
-        auto My = GenLatticeEmbeddings(target, nb_vec, Ei, taui, style);
+            auto Mx = GenLatticeEmbeddings(source, nb_vec, Ei, taui, style);
+            auto My = GenLatticeEmbeddings(target, nb_vec, Ei, taui, style);
 
-        PatternCausalityRes res = PatternCausality(
-            Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
-            dist_metric, relative, weighted, 1);
+            PatternCausalityRes res = PatternCausality(
+                Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
+                dist_metric, relative, weighted, 1);
 
-        result[i][0] = Ei;
-        result[i][1] = bi;
-        result[i][2] = taui;
-        result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
-        result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
-        result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
-        }, threads_sizet);
+            result[i][0] = Ei;
+            result[i][1] = bi;
+            result[i][2] = taui;
+            result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+            result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+            result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+            }, threads_sizet);
     }
 
     // --- Perform Pattern Causality Analysis -------------------------
