@@ -474,6 +474,7 @@ Rcpp::List RcppPCops(
     bool relative = true,
     bool weighted = true,
     int threads = 1,
+    int parallel_level = 0,
     int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
     Rcpp::Nullable<int> nrows = R_NilValue)
@@ -527,6 +528,56 @@ Rcpp::List RcppPCops(
         for (size_t kk : bs)
         for (size_t tt : taus)
             unique_EbTau.emplace_back(ee, kk, tt);
+
+    std::vector<std::vector<double>> result(unique_EbTau.size(), std::vector<double>(6));
+
+    if (parallel_level == 0){
+        for (size_t i = 0; i < unique_EbTau.size(); ++i) {
+        const int Ei   = std::get<0>(unique_EbTau[i]);
+        const int bi   = std::get<1>(unique_EbTau[i]);
+        const int taui = std::get<2>(unique_EbTau[i]);
+        // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
+
+        auto Mx = GenLatticeEmbeddings(source, nb_vec, Ei, taui, style);
+        auto My = GenLatticeEmbeddings(target, nb_vec, Ei, taui, style);
+
+        PatternCausalityRes res = PatternCausality(
+            Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
+            dist_metric, relative, weighted, threads);
+
+        result[i][0] = Ei;
+        result[i][1] = bi;
+        result[i][2] = taui;
+        result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+        result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+        result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+        }
+    } else {
+        // Configure threads
+        size_t threads_sizet = static_cast<size_t>(std::abs(threads));
+        threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
+
+        RcppThread::parallelFor(0, unique_EbTau.size(), [&](size_t i) {
+        const int Ei   = std::get<0>(unique_EbTau[i]);
+        const int bi   = std::get<1>(unique_EbTau[i]);
+        const int taui = std::get<2>(unique_EbTau[i]);
+        // auto [Ei, bi, taui] = unique_EbTau[i]; // C++17 structured binding
+
+        auto Mx = GenLatticeEmbeddings(source, nb_vec, Ei, taui, style);
+        auto My = GenLatticeEmbeddings(target, nb_vec, Ei, taui, style);
+
+        PatternCausalityRes res = PatternCausality(
+            Mx, My, lib_indices, pred_indices, bi, zero_tolerance,
+            dist_metric, relative, weighted, 1);
+
+        result[i][0] = Ei;
+        result[i][1] = bi;
+        result[i][2] = taui;
+        result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
+        result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
+        result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
+        }, threads_sizet);
+    }
 
     // --- Embedding Construction ------------------------------------------------
     std::vector<std::vector<double>> Mx;
