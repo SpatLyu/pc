@@ -488,7 +488,7 @@ Rcpp::DataFrame RcppPCboot(
  * @param maximize A string specifying which metric to prioritize.
  * @return IntegerVector containing E k tau in this order.
  */
-Rcpp::IntegerVector OptPCparm(Rcpp::NumericMatrix Emat,
+Rcpp::IntegerVector OptPCparm(const Rcpp::NumericMatrix& Emat,
                               const std::string maximize& = "positive") {
 
   if (Emat.ncol() != 6) {
@@ -608,6 +608,7 @@ Rcpp::List RcppPCops(
     const Rcpp::IntegerVector& E,
     const Rcpp::IntegerVector& tau,
     const Rcpp::IntegerVector& k,
+    const std::string maximize& = "positive",
     int style = 0,
     int zero_tolerance = 0,
     const std::string& dist_metric = "euclidean",
