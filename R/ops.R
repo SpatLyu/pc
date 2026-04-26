@@ -1,6 +1,7 @@
 .ops_ts = \(data, target, source, E = 3, k = E+2, tau = 1, style = 1, lib = NULL, pred = NULL,
             maximize = c("positive", "negative", "dark"), dist.metric = c("euclidean", "manhattan", "maximum"), 
             zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(libsizes), lower.parallel = TRUE, h = 0) {
+  maximize = match.arg(maximize)
   dist.metric = match.arg(dist.metric)
   dlist = .validate_var(data, target, source)
   tv = dlist[[1]]; sv = dlist[[2]]
@@ -20,6 +21,7 @@
                  maximize = c("positive", "negative", "dark"), dist.metric = c("euclidean", "manhattan", "maximum"), 
                  zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(libsizes), lower.parallel = TRUE, nb = NULL) {
   if (is.null(nb)) nb = sdsfun::spdep_nb(data)
+  maximize = match.arg(maximize)
   dist.metric = match.arg(dist.metric)
   dlist = .validate_var(data, target, source)
   tv = dlist[[1]]; sv = dlist[[2]]
@@ -38,6 +40,7 @@
 .ops_grid = \(data, target, source, E = 3, k = E+2, tau = 1, style = 1, lib = NULL, pred = NULL,
               maximize = c("positive", "negative", "dark"), dist.metric = c("euclidean", "manhattan", "maximum"), 
               zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(libsizes), lower.parallel = TRUE) {
+  maximize = match.arg(maximize)
   dist.metric = match.arg(dist.metric)
   dlist = .validate_var(data, target, source)
   tv = dlist[[1]]; sv = dlist[[2]]
