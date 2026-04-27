@@ -821,12 +821,12 @@ Rcpp::List RcppPCops(
 
     // --- Proper data.frame construction ----------------
     Rcpp::List pdf = Rcpp::List::create(
-        Rcpp::Named("E")        = pmat(_, 0),
-        Rcpp::Named("k")        = pmat(_, 1),
-        Rcpp::Named("tau")      = pmat(_, 2),
-        Rcpp::Named("Positive") = pmat(_, 3),
-        Rcpp::Named("Negative") = pmat(_, 4),
-        Rcpp::Named("Dark")     = pmat(_, 5)
+        Rcpp::Named("E")        = pmat(Rcpp::_, 0),
+        Rcpp::Named("k")        = pmat(Rcpp::_, 1),
+        Rcpp::Named("tau")      = pmat(Rcpp::_, 2),
+        Rcpp::Named("Positive") = pmat(Rcpp::_, 3),
+        Rcpp::Named("Negative") = pmat(Rcpp::_, 4),
+        Rcpp::Named("Dark")     = pmat(Rcpp::_, 5)
     );
 
     // --- Return structured results --------------------------------------------
