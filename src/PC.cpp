@@ -200,7 +200,6 @@ Rcpp::List RcppPC(
         Rcpp::Named("causality") = causality_df,
         Rcpp::Named("summary") = summary_df
     );
-
     out.attr("class") = Rcpp::CharacterVector::create("pc_single");
 
     return out;
@@ -832,7 +831,6 @@ Rcpp::List RcppPCops(
         Rcpp::Named("param") = pvec,
         Rcpp::Named("xmap") = pmat
     );
-
     out.attr("class") = Rcpp::CharacterVector::create("pc_ops");
 
     return out;
