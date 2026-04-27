@@ -48,8 +48,8 @@
 #'
 #' @return A list.
 #' \describe{
-#' \item{\code{param}}{selected optimal parameter}
-#' \item{\code{xmap}}{cross mapping performance}
+#'   \item{\code{param}}{The selected optimal parameter combination.}
+#'   \item{\code{xmap}}{A data.frame containing cross-mapping performance across parameter settings.}
 #' }
 #'
 #' @export
