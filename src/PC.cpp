@@ -285,6 +285,11 @@ Rcpp::DataFrame RcppPCboot(
         E_std[1] = E_vec[1];
     }
 
+    // Make sure each E is greater than 2
+    for (auto& singleE : E_std) {
+        if (singleE < 2) singleE = 2;
+    }
+
     // ---- tau ----
     if (tau_vec.size() == 1) 
     {
