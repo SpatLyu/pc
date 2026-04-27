@@ -810,27 +810,30 @@ Rcpp::List RcppPCops(
             result[i][3] = std::isnan(res.TotalPos) ? 0.0 : res.TotalPos;
             result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
             result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
-            }, threads_sizet);
+        }, threads_sizet);
     }
     
     // --- Convert performance matrix to r--------------------------
     Rcpp::NumericMatrix pmat = pc::convert::mat_std2r(result, true);
+
     // --- Select optimal parameters ---------------------
     Rcpp::IntegerVector pvec = OptPCparm(pmat, maximize);
 
-    // Assign column names
-    Rcpp::colnames(pmat) = Rcpp::CharacterVector::create(
-        "E", "k", "tau", "Positive", "Negative", "Dark"
+    // --- Proper data.frame construction ----------------
+    Rcpp::List pdf = Rcpp::List::create(
+        Rcpp::Named("E")        = pmat(_, 0),
+        Rcpp::Named("k")        = pmat(_, 1),
+        Rcpp::Named("tau")      = pmat(_, 2),
+        Rcpp::Named("Positive") = pmat(_, 3),
+        Rcpp::Named("Negative") = pmat(_, 4),
+        Rcpp::Named("Dark")     = pmat(_, 5)
     );
-    // Convert to data.frame by setting class and row names
-    pmat.attr("class") = "data.frame";
-    pmat.attr("row.names") = Rcpp::IntegerVector::create(NA_INTEGER, -pmat.nrow());
 
     // --- Return structured results --------------------------------------------
 
     Rcpp::List out = Rcpp::List::create(
         Rcpp::Named("param") = pvec,
-        Rcpp::Named("xmap") = pmat
+        Rcpp::Named("xmap") = pdf
     );
     out.attr("class") = Rcpp::CharacterVector::create("pc_ops");
 
