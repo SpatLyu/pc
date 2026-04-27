@@ -815,6 +815,13 @@ Rcpp::List RcppPCops(
     // --- Select optimal parameters ---------------------
     Rcpp::IntegerVector pvec = OptPCparm(pmat, maximize);
 
+    // Assign column names
+    Rcpp::colnames(pmat) = Rcpp::CharacterVector::create(
+        "E", "k", "tau", "Positive", "Negative", "Dark"
+    );
+    // Convert to data.frame by setting class and row names
+    pmat.attr("class") = "data.frame";
+
     // --- Return structured results --------------------------------------------
 
     return Rcpp::List::create(
