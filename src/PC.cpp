@@ -665,6 +665,10 @@ Rcpp::List RcppPCops(
 
     // Unique sorted embedding dimensions, neighbor values, and tau values
     std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
+    // Make sure each E is greater than 2
+    for (auto& singleE : Es) {
+        if (singleE < 2) singleE = 2;
+    }
     std::sort(Es.begin(), Es.end());
     Es.erase(std::unique(Es.begin(), Es.end()), Es.end());
 
