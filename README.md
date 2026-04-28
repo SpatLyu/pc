@@ -22,19 +22,30 @@ The goal of pc is to ...
 
 ## Installation
 
-You can install the development version of pc from [GitHub](https://github.com/) with:
+- Install from [CRAN](https://CRAN.R-project.org/package=pc) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("stscl/pc")
+install.packages("pc", dep = TRUE)
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+- Install binary version from
+  [R-universe](https://stscl.r-universe.dev/pc) with:
 
 ``` r
-library(pc)
-## basic example code
+install.packages("pc",
+                 repos = c("https://stscl.r-universe.dev",
+                           "https://cloud.r-project.org"),
+                 dep = TRUE)
 ```
 
+- Install from source code on [GitHub](https://github.com/stscl/pc)
+  with:
+
+``` r
+if (!requireNamespace("devtools")) {
+    install.packages("devtools")
+}
+devtools::install_github("stscl/pc",
+                         build_vignettes = TRUE,
+                         dep = TRUE)
+```
