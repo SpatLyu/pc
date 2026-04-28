@@ -1,4 +1,3 @@
-
 .pc_ts = \(data, target, source, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
            random = TRUE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k),
            relative = TRUE, weighted = TRUE, threads = length(libsizes), lower.parallel = TRUE, verbose = TRUE, h = 0) {
