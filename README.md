@@ -39,7 +39,7 @@ provides efficient and flexible tools for data-driven causality analysis.
 - Install from [CRAN](https://CRAN.R-project.org/package=pc) with:
 
 ``` r
-install.packages("pc", dep = TRUE)
+install.packages("pc", dependencies = TRUE)
 ```
 
 - Install binary version from
@@ -49,7 +49,7 @@ install.packages("pc", dep = TRUE)
 install.packages("pc",
                  repos = c("https://stscl.r-universe.dev",
                            "https://cloud.r-project.org"),
-                 dep = TRUE)
+                 dependencies = TRUE)
 ```
 
 - Install from source code on [GitHub](https://github.com/stscl/pc)
