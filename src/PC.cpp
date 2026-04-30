@@ -772,7 +772,7 @@ Rcpp::List RcppPCops(
                 static_cast<size_t>(std::abs(zero_tolerance)),
                 static_cast<size_t>(std::abs(h)),
                 dist_metric, relative, weighted,
-                static_cast<size_t>(std::abs(threads)));
+                static_cast<size_t>(std::abs(threads)), false);
 
             result[i][0] = Ei;
             result[i][1] = ki;
