@@ -450,7 +450,8 @@ namespace symdync
         const std::vector<std::vector<double>>& SMx,
         const std::vector<std::vector<double>>& SMy,
         const std::vector<std::vector<double>>& pred_SMy,
-        bool weighted = true
+        bool weighted = true,
+        bool save_detail = true
     )
     {   
         PatternCausalityRes res;
@@ -538,12 +539,15 @@ namespace symdync
         /* ------------------------------------------------------------
          *  5. Init result
          * ------------------------------------------------------------ */
-        res.NoCausality.assign(n, 0.0);
-        res.PositiveCausality.assign(n, 0.0);
-        res.NegativeCausality.assign(n, 0.0);
-        res.DarkCausality.assign(n, 0.0);
-        res.PatternTypes.reserve(n);
-        res.RealLoop.reserve(n);
+        if (save_detail)
+        {
+            res.NoCausality.assign(n, 0.0);
+            res.PositiveCausality.assign(n, 0.0);
+            res.NegativeCausality.assign(n, 0.0);
+            res.DarkCausality.assign(n, 0.0);
+            res.PatternTypes.reserve(n);
+            res.RealLoop.reserve(n);
+        }
 
         std::vector<std::vector<double>> heatmap(
             K, std::vector<double>(K, std::numeric_limits<double>::quiet_NaN())
@@ -572,13 +576,17 @@ namespace symdync
                 contains_zero(PY_pred[t]))
                 continue;
 
-            res.RealLoop.push_back(t);
+            if (save_detail)
+                res.RealLoop.push_back(t);
 
             /* --- causality existence --- */
             if (PY_pred[t] != PY_real[t])
-            {
-                res.NoCausality[t] = 1.0;
-                res.PatternTypes.push_back(0);
+            {   
+                if (save_detail)
+                {
+                    res.NoCausality[t] = 1.0;
+                    res.PatternTypes.push_back(0);
+                }
                 continue;
             }
 
@@ -600,20 +608,23 @@ namespace symdync
             size_t j = std::distance(all_patterns.begin(), it_j);
 
             /* --- classification --- */
-            if (i == j)
+            if (save_detail)
             {
-                res.PositiveCausality[t] = strength;
-                res.PatternTypes.push_back(1);
-            }
-            else if (j == opposite_id[i])
-            {
-                res.NegativeCausality[t] = strength;
-                res.PatternTypes.push_back(2);
-            }
-            else
-            {
-                res.DarkCausality[t] = strength;
-                res.PatternTypes.push_back(3);
+                if (i == j)
+                {
+                    res.PositiveCausality[t] = strength;
+                    res.PatternTypes.push_back(1);
+                }
+                else if (j == opposite_id[i])
+                {
+                    res.NegativeCausality[t] = strength;
+                    res.PatternTypes.push_back(2);
+                }
+                else
+                {
+                    res.DarkCausality[t] = strength;
+                    res.PatternTypes.push_back(3);
+                }
             }
 
             /* --- heatmap --- */
