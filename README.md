@@ -22,10 +22,10 @@ experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimenta
 
 <p style="clear: both; text-align: right; font-size: 11px; margin-top: 0;">logo by layeyo</p> -->
 
-<a href="https://stscl.github.io/pc/" style="text-align: right; display: block;">
-  <img src="man/figures/pc.png" hspace="5" vspace="0" width="15%" alt="pc website" style="float: right;"/>
+<div style="text-align: right;">
+  <a href="https://stscl.github.io/pc/"><img src="man/figures/pc.png" hspace="5" vspace="0" width="15%" alt="pc website: https://stscl.github.io/pc/" style="float: right;"/></a>
   <p style="clear: both; font-size: 11px; margin: 0;">logo by layeyo</p>
-</a>
+</div>
 
 ***P**attern **C**ausality Analysis*
 
