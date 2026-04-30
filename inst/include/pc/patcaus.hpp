@@ -49,7 +49,7 @@ namespace pc
 
 namespace patcaus
 {   
-    /************************************************************************
+    /**********************************************************************************
      *  Compute pattern-based causality from Mx to My using a fixed
      *  library and prediction set.
      *
@@ -65,7 +65,7 @@ namespace patcaus
      *      weighted        : Use weighted pattern comparison
      *      threads         : Number of threads for parallel execution
      *      save_detail     : Make per-sample causality output
-     ************************************************************************/
+     **********************************************************************************/
     inline pc::symdync::PatternCausalityRes patcaus(
         const std::vector<std::vector<double>>& Mx,
         const std::vector<std::vector<double>>& My,
