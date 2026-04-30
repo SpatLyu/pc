@@ -1,5 +1,7 @@
 
-# pc
+# pc <a href="https://stscl.github.io/pc/"><img src="man/figures/pc.png" align="right" hspace="5" vspace="0" width="15%" alt="pc website: https://stscl.github.io/pc/"/></a>
+
+<p align="right"; style="font-size:11px">logo by layeyo</p>
 
 <!-- badges: start -->
 
@@ -17,15 +19,6 @@ experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimenta
 [![R-universe](https://stscl.r-universe.dev/badges/pc?color=cyan)](https://stscl.r-universe.dev/pc)
 
 <!-- badges: end -->
-
-<!-- <a href="https://stscl.github.io/pc/"><img src="man/figures/pc.png" align="right" hspace="5" vspace="0" width="15%" alt="pc website: https://stscl.github.io/pc/"/></a>
-
-<p style="clear: both; text-align: right; font-size: 11px; margin-top: 0;">logo by layeyo</p> -->
-
-<div style="text-align: right;">
-  <a href="https://stscl.github.io/pc/"><img src="man/figures/pc.png" hspace="5" vspace="0" width="15%" alt="pc website: https://stscl.github.io/pc/" style="float: right;"/></a>
-  <p style="clear: both; font-size: 11px; margin: 0;">logo by layeyo</p>
-</div>
 
 ***P**attern **C**ausality Analysis*
 
