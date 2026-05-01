@@ -133,8 +133,38 @@ namespace patcaus
     // --------------------------------------------------------------------------
     // Step 4: Compute pattern-based causality using symbolic pattern comparison
     // --------------------------------------------------------------------------
-    pc::symdync::PatternCausalityRes res = 
-        pc::symdync::computePatternCausality(SMx, SMy, PredSMy, weighted, save_detail);
+    pc::symdync::PatternCausalityRes res;
+    bool use_subset = (pred_indices.size() < Mx.size());
+
+    if (!use_subset)
+    {
+        // --- Full data: no slicing needed ---
+        res = pc::symdync::computePatternCausality(
+            SMx, SMy, PredSMy, weighted, save_detail);
+    }
+    else
+    {
+        // --- Slice Mx and My ---
+        std::vector<std::vector<double>> SMx_sub;
+        std::vector<std::vector<double>> SMy_sub;
+        std::vector<std::vector<double>> PredSMy_sub;
+
+        Mx_sub.reserve(pred_indices.size());
+        My_sub.reserve(pred_indices.size());
+        PredSMy_sub.reserve(pred_indices.size());
+
+        for (size_t i = 0; i < pred_indices.size(); ++i)
+        {
+            size_t idx = pred_indices[i];
+            Mx_sub.push_back(Mx[idx]);
+            My_sub.push_back(My[idx]);
+            PredSMy_sub.push_back(PredSMy_sub[idx]);
+        }
+
+        // --- Compute patcaus on subset ---
+        res = pc::symdync::computePatternCausality(
+            SMx_sub, SMy_sub, PredSMy_sub, weighted, save_detail);
+    }
 
     return res;
     }
