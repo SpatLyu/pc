@@ -262,7 +262,7 @@ Rcpp::List RcppPC(
     }
 
     // --- Create DataFrame for per-sample causality (aligned with RealLoop) ---
-    const size_t n_samples = res.RealLoop.size();
+    const size_t n_samples = res.PatternTypes.size();
 
     // Allocate vectors
     Rcpp::NumericVector no(n_samples);
