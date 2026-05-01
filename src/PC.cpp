@@ -215,16 +215,7 @@ Rcpp::List RcppPC(
             static_cast<size_t>(std::abs(threads)), true);
     }
     else
-    {
-        // --- Subset mode: build index map ---
-        std::unordered_map<size_t, size_t> index_map;
-        index_map.reserve(selected_indices.size());
-
-        for (size_t i = 0; i < selected_indices.size(); ++i)
-        {
-            index_map[selected_indices[i]] = i;
-        }
-
+    {   
         // --- Slice Mx and My ---
         std::vector<std::vector<double>> Mx_sub;
         std::vector<std::vector<double>> My_sub;
@@ -237,6 +228,15 @@ Rcpp::List RcppPC(
             size_t idx = selected_indices[i];
             Mx_sub.push_back(Mx[idx]);
             My_sub.push_back(My[idx]);
+        }
+
+        // --- Subset mode: build index map ---
+        std::unordered_map<size_t, size_t> index_map;
+        index_map.reserve(selected_indices.size());
+        
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            index_map[selected_indices[i]] = i;
         }
 
         // --- Remap lib indices ---
