@@ -1005,6 +1005,32 @@ Rcpp::List RcppPCops(
         std::unique(selected_indices.begin(), selected_indices.end()),
         selected_indices.end()
     );
+
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < tg.size());
+
+    if (use_subset)
+    {
+        std::unordered_map<size_t, size_t> index_map;
+        index_map.reserve(selected_indices.size());
+
+        for (size_t i = 0; i < selected_indices.size(); ++i)
+        {
+            index_map[selected_indices[i]] = i;
+        }
+
+        // --- Remap lib indices ---
+        for (size_t i = 0; i < lib_std.size(); ++i)
+        {
+            lib_std[i] = index_map[lib_std[i]];
+        }
+
+        // --- Remap pred indices ---
+        for (size_t i = 0; i < pred_std.size(); ++i)
+        {
+            pred_std[i] = index_map[pred_std[i]];
+        }
+    }
     
     // --- Perform Pattern Causality Analysis -------------------------
     std::vector<std::vector<double>> result(unique_EkTau.size(), std::vector<double>(6));
@@ -1043,9 +1069,6 @@ Rcpp::List RcppPCops(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
             }
 
-            // --- Check if full set is used ---
-            bool use_subset = (selected_indices.size() < Mx.size());
-
             // --- Perform Pattern Causality Analysis ---
             pc::symdync::PatternCausalityRes res;
 
@@ -1061,19 +1084,9 @@ Rcpp::List RcppPCops(
             }
             else
             {
-                // --- Subset mode: build index map ---
-                std::unordered_map<size_t, size_t> index_map;
-                index_map.reserve(selected_indices.size());
-
-                for (size_t i = 0; i < selected_indices.size(); ++i)
-                {
-                    index_map[selected_indices[i]] = i;
-                }
-
-                // --- Slice Mx and My ---
+                // --- Subset mode: slice Mx and My ---
                 std::vector<std::vector<double>> Mx_sub;
                 std::vector<std::vector<double>> My_sub;
-
                 Mx_sub.reserve(selected_indices.size());
                 My_sub.reserve(selected_indices.size());
 
@@ -1084,20 +1097,7 @@ Rcpp::List RcppPCops(
                     My_sub.push_back(My[idx]);
                 }
 
-                // --- Remap lib indices ---
-                for (size_t i = 0; i < lib_std.size(); ++i)
-                {
-                    lib_std[i] = index_map[lib_std[i]];
-                }
-
-                // --- Remap pred indices ---
-                for (size_t i = 0; i < pred_std.size(); ++i)
-                {
-                    pred_std[i] = index_map[pred_std[i]];
-                }
-
                 // --- Run patcaus on subset ---
-                // --- Full data: no slicing needed ---
                 res = pc::patcaus::patcaus(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
