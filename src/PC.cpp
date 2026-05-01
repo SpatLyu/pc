@@ -259,13 +259,6 @@ Rcpp::List RcppPC(
             static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
             static_cast<size_t>(std::abs(threads)), true);
-
-        // --- Recover original indices for RealLoop ---
-        for (size_t i = 0; i < res.RealLoop.size(); ++i)
-        {
-            size_t sub_idx = res.RealLoop[i];
-            res.RealLoop[i] = pred_indices[sub_idx];
-        }
     }
 
     // --- Create DataFrame for per-sample causality (aligned with RealLoop) ---
@@ -277,14 +270,14 @@ Rcpp::List RcppPC(
     Rcpp::NumericVector negative(n_samples);
     Rcpp::NumericVector dark(n_samples);
 
-    Rcpp::IntegerVector real_loop(n_samples);  // original indices (+1 for R)
+    Rcpp::IntegerVector real_index(n_samples);  // original indices (+1 for R)
     Rcpp::CharacterVector pattern_labels(n_samples);
 
     // Fill values (direct alignment with res)
     for (size_t i = 0; i < n_samples; ++i)
     {
         // Restore original index (+1 for R)
-        real_loop[i] = static_cast<int>(res.RealLoop[i] + 1);
+        real_index[i] = static_cast<int>(pred_indices[i] + 1);
 
         // Directly use i (NOT idx)
         no[i]       = res.NoCausality[i];
@@ -305,7 +298,7 @@ Rcpp::List RcppPC(
 
     // Build DataFrame
     Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
-        Rcpp::Named("index")    = real_loop,
+        Rcpp::Named("index")    = real_index,
         Rcpp::Named("no")       = no,
         Rcpp::Named("positive") = positive,
         Rcpp::Named("negative") = negative,
@@ -577,7 +570,7 @@ Rcpp::DataFrame RcppPCboot(
             Mx_sub.push_back(Mx[idx]);
             My_sub.push_back(My[idx]);
         }
-        
+
         // --- Subset mode: build index map ---
         std::unordered_map<size_t, size_t> index_map;
         index_map.reserve(selected_indices.size());
