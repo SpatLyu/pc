@@ -267,38 +267,49 @@ Rcpp::List RcppPC(
         }
     }
 
-    // --- Create DataFrame for per-sample causality ---
+    // --- Create DataFrame for per-sample causality (aligned with RealLoop) ---
+    const size_t n_samples = res.RealLoop.size();
 
-    const size_t n_samples = res.NoCausality.size();
-    Rcpp::LogicalVector real_loop(n_samples, false);
-    Rcpp::CharacterVector pattern_labels(n_samples, "no");
+    // Allocate vectors
+    Rcpp::NumericVector no(n_samples);
+    Rcpp::NumericVector positive(n_samples);
+    Rcpp::NumericVector negative(n_samples);
+    Rcpp::NumericVector dark(n_samples);
 
-    for (size_t rl = 0; rl < res.RealLoop.size(); ++rl) 
+    Rcpp::IntegerVector real_loop(n_samples);  // original indices (+1 for R)
+    Rcpp::CharacterVector pattern_labels(n_samples);
+
+    // Fill values (direct alignment with res)
+    for (size_t i = 0; i < n_samples; ++i)
     {
-        size_t idx = res.RealLoop[rl];
-        if (idx < n_samples) 
+        // Restore original index (+1 for R)
+        real_loop[i] = static_cast<int>(res.RealLoop[i] + 1);
+
+        // Directly use i (NOT idx)
+        no[i]       = res.NoCausality[i];
+        positive[i] = res.PositiveCausality[i];
+        negative[i] = res.NegativeCausality[i];
+        dark[i]     = res.DarkCausality[i];
+
+        // Pattern type mapping
+        switch (res.PatternTypes[i])
         {
-            // Record validated samples
-            real_loop[idx] = true;
-            // Map pattern_types (0–3) → descriptive string labels
-            switch (res.PatternTypes[rl]) 
-            {
-                case 0: pattern_labels[idx]  = "no"; break;
-                case 1: pattern_labels[idx]  = "positive"; break;
-                case 2: pattern_labels[idx]  = "negative"; break;
-                case 3: pattern_labels[idx]  = "dark"; break;
-                default: pattern_labels[idx] = "unknown"; break;
-            }
+            case 0: pattern_labels[i] = "no"; break;
+            case 1: pattern_labels[i] = "positive"; break;
+            case 2: pattern_labels[i] = "negative"; break;
+            case 3: pattern_labels[i] = "dark"; break;
+            default: pattern_labels[i] = "unknown"; break;
         }
     }
 
+    // Build DataFrame
     Rcpp::DataFrame causality_df = Rcpp::DataFrame::create(
-        Rcpp::Named("no") = Rcpp::NumericVector(res.NoCausality.begin(), res.NoCausality.end()),
-        Rcpp::Named("positive") = Rcpp::NumericVector(res.PositiveCausality.begin(), res.PositiveCausality.end()),
-        Rcpp::Named("negative") = Rcpp::NumericVector(res.NegativeCausality.begin(), res.NegativeCausality.end()),
-        Rcpp::Named("dark") = Rcpp::NumericVector(res.DarkCausality.begin(), res.DarkCausality.end()),
-        Rcpp::Named("type") = pattern_labels,
-        Rcpp::Named("valid") = real_loop
+        Rcpp::Named("index")    = real_loop,
+        Rcpp::Named("no")       = no,
+        Rcpp::Named("positive") = positive,
+        Rcpp::Named("negative") = negative,
+        Rcpp::Named("dark")     = dark,
+        Rcpp::Named("type")     = pattern_labels
     );
 
     // --- Create summary DataFrame for causal strengths ---
