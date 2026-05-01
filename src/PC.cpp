@@ -146,14 +146,13 @@ Rcpp::List RcppPC(
         );
     }
 
-    // ---- sort + unique lib ----
+    // ---- sort + unique lib/pred ----
     std::sort(lib_std.begin(), lib_std.end());
     lib_std.erase(
         std::unique(lib_std.begin(), lib_std.end()),
         lib_std.end()
     );
 
-    // ---- sort + unique pred ----
     std::sort(pred_std.begin(), pred_std.end());
     pred_std.erase(
         std::unique(pred_std.begin(), pred_std.end()),
