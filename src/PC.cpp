@@ -1053,12 +1053,11 @@ Rcpp::List RcppPCops(
             {
                 // --- Full data: no slicing needed ---
                 res = pc::patcaus::patcaus(
-                    Mx, My, lib_std, pred_std, 
-                    static_cast<size_t>(std::abs(num_neighbors)),
+                    Mx, My, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), true);
+                    static_cast<size_t>(std::abs(threads)), false);
             }
             else
             {
@@ -1098,28 +1097,14 @@ Rcpp::List RcppPCops(
                 }
 
                 // --- Run patcaus on subset ---
+                // --- Full data: no slicing needed ---
                 res = pc::patcaus::patcaus(
-                    Mx_sub, My_sub, lib_std, pred_std, 
-                    static_cast<size_t>(std::abs(num_neighbors)),
+                    Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), true);
-
-                // --- Recover original indices for RealLoop ---
-                for (size_t i = 0; i < res.RealLoop.size(); ++i)
-                {
-                    size_t sub_idx = res.RealLoop[i];
-                    res.RealLoop[i] = selected_indices[sub_idx];
-                }
+                    static_cast<size_t>(std::abs(threads)), false);
             }
-
-            pc::symdync::PatternCausalityRes res = pc::patcaus::patcaus(
-                Mx, My, lib_std, pred_std, ki,
-                static_cast<size_t>(std::abs(zero_tolerance)),
-                static_cast<size_t>(std::abs(h)),
-                dist_metric, relative, weighted,
-                static_cast<size_t>(std::abs(threads)), false);
 
             result[i][0] = Ei;
             result[i][1] = ki;
