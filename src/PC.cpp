@@ -38,7 +38,8 @@ Rcpp::List RcppPC(
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
     for (auto& idx : lib_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("lib index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -50,7 +51,8 @@ Rcpp::List RcppPC(
     std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
     for (auto& idx : pred_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("pred index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
