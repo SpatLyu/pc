@@ -30,7 +30,6 @@ Rcpp::List RcppPC(
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
     // --- Input Conversion and Validation ---
-
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
     std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
     const size_t n_obs = tg.size();
@@ -360,7 +359,6 @@ Rcpp::DataFrame RcppPCboot(
     Rcpp::Nullable<int> nrows = R_NilValue)
 {
     // --- Input Conversion and Validation --------------------------------------
-
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
     std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
     const size_t n_obs = tg.size();
@@ -476,6 +474,58 @@ Rcpp::DataFrame RcppPCboot(
             pred_std.end()
         );
     }
+
+    // ---- sort + unique lib/pred ----
+    std::sort(lib_std.begin(), lib_std.end());
+    lib_std.erase(
+        std::unique(lib_std.begin(), lib_std.end()),
+        lib_std.end()
+    );
+
+    std::sort(pred_std.begin(), pred_std.end());
+    pred_std.erase(
+        std::unique(pred_std.begin(), pred_std.end()),
+        pred_std.end()
+    );
+
+    // ---- filter lib/pred (remove NaN in target/source) ----
+    size_t write = 0;
+    for (size_t i = 0; i < lib_std.size(); ++i)
+    {
+        size_t idx = lib_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            lib_std[write++] = idx;
+        }
+    }
+    lib_std.resize(write);
+
+    write = 0;
+    for (size_t i = 0; i < pred_std.size(); ++i)
+    {
+        size_t idx = pred_std[i];
+        if (!(std::isnan(tg[idx]) || std::isnan(sg[idx])))
+        {
+            pred_std[write++] = idx;
+        }
+    }
+    pred_std.resize(write);
+    
+    // --- Prepare for data slicing ---
+    std::vector<size_t> selected_indices;
+    selected_indices.reserve(lib_std.size() + pred_std.size());
+    for (size_t i = 0; i < lib_std.size(); ++i)
+        selected_indices.push_back(lib_std[i]);
+    for (size_t i = 0; i < pred_std.size(); ++i)
+        selected_indices.push_back(pred_std[i]);
+    std::sort(selected_indices.begin(), selected_indices.end());
+    selected_indices.erase(
+        std::unique(selected_indices.begin(), selected_indices.end()),
+        selected_indices.end()
+    );
+
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < Mx.size());
 
     // Validate and preprocess library sizes
     std::vector<size_t> libsizes_std = Rcpp::as<std::vector<size_t>>(libsizes);
