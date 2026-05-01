@@ -524,9 +524,6 @@ Rcpp::DataFrame RcppPCboot(
         selected_indices.end()
     );
 
-    // --- Check if full set is used ---
-    bool use_subset = (selected_indices.size() < Mx.size());
-
     // Validate and preprocess library sizes
     std::vector<size_t> libsizes_std = Rcpp::as<std::vector<size_t>>(libsizes);
     std::vector<size_t> valid_libsizes;
@@ -543,6 +540,9 @@ Rcpp::DataFrame RcppPCboot(
         Rcpp::warning("[Warning] No valid libsizes after filtering. Using full library size as fallback.");
         valid_libsizes.push_back(lib_std.size());
     }
+
+    // --- Check if full set is used ---
+    bool use_subset = (selected_indices.size() < Mx.size());
 
     // --- Perform Bootstrapped Pattern Causality Analysis -------------------------
     std::vector<std::vector<std::vector<double>>> res = pc::patcaus::patcaus(
