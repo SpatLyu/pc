@@ -181,6 +181,8 @@ Rcpp::List RcppPC(
         }
     }
     pred_std.resize(write);
+    // Copy prediction indices for mapping back to original dataset
+    std::vector<size_t> pred_indices = pred_std;
     
     // --- Prepare for data slicing ---
     std::vector<size_t> selected_indices;
@@ -262,7 +264,7 @@ Rcpp::List RcppPC(
         for (size_t i = 0; i < res.RealLoop.size(); ++i)
         {
             size_t sub_idx = res.RealLoop[i];
-            res.RealLoop[i] = pred_std[sub_idx];
+            res.RealLoop[i] = pred_indices[sub_idx];
         }
     }
 
