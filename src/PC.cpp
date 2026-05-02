@@ -887,7 +887,8 @@ Rcpp::List RcppPCops(
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
     for (auto& idx : lib_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("lib index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -899,7 +900,8 @@ Rcpp::List RcppPCops(
     std::vector<size_t> pred_std = Rcpp::as<std::vector<size_t>>(pred);
     for (auto& idx : pred_std) 
     {
-        if (idx < 1 || idx > n_obs) {
+        if (idx < 1 || idx > n_obs) 
+        {
             Rcpp::stop("pred index %d out of bounds [1, %d]",
                        static_cast<int>(idx),
                        static_cast<int>(n_obs));
@@ -910,7 +912,8 @@ Rcpp::List RcppPCops(
     // Unique sorted embedding dimensions, neighbor values, and tau values
     std::vector<size_t> Es = Rcpp::as<std::vector<size_t>>(E);
     // Make sure each E is greater than 2
-    for (auto& singleE : Es) {
+    for (auto& singleE : Es) 
+    {
         if (singleE < 2) singleE = 2;
     }
     std::sort(Es.begin(), Es.end());
@@ -1052,8 +1055,10 @@ Rcpp::List RcppPCops(
     // --- Perform Pattern Causality Analysis -------------------------
     std::vector<std::vector<double>> result(unique_EkTau.size(), std::vector<double>(6));
 
-    if (parallel_level == 0) {
-        for (size_t i = 0; i < unique_EkTau.size(); ++i) {
+    if (parallel_level == 0) 
+    {
+        for (size_t i = 0; i < unique_EkTau.size(); ++i) 
+        {
             const size_t Ei   = std::get<0>(unique_EkTau[i]);
             const size_t ki   = std::get<1>(unique_EkTau[i]);
             const size_t taui = std::get<2>(unique_EkTau[i]);
@@ -1130,7 +1135,9 @@ Rcpp::List RcppPCops(
             result[i][4] = std::isnan(res.TotalNeg) ? 0.0 : res.TotalNeg;
             result[i][5] = std::isnan(res.TotalDark) ? 0.0 : res.TotalDark;
         }
-    } else {
+    } 
+    else 
+    {
         // Configure threads
         size_t threads_sizet = static_cast<size_t>(std::abs(threads));
         threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
