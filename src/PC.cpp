@@ -263,7 +263,7 @@ Rcpp::List RcppPC(
             static_cast<size_t>(std::abs(threads)), true);
     }
 
-    // --- Create DataFrame for per-sample causality (aligned with RealLoop) ---
+    // --- Create DataFrame for per-sample causality ---
     const size_t n_samples = res.PatternTypes.size();
 
     // Allocate vectors
