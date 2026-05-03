@@ -7,24 +7,17 @@
       coords = terra::rowColFromCell(data, seq_len(terra::ncell(data)))
     }
   }
-  
+
   var_indices = c(abs(target[1]), abs(source[1]))
-  if (inherits(data, "SpatRaster")) {
-    data = data[[var_indices]]
+  if (inherits(data, "sf")) {
+    data = sf::st_drop_geometry(data[, var_indices, drop = FALSE])
+  } else if (inherits(data, "SpatRaster")) {
+    data = terra::as.data.frame(data[[var_indices]], xy = FALSE, na.rm = FALSE)
   } else {
     data = data[, var_indices, drop = FALSE]
   }
   
   
-
-
-  if (inherits(data, "sf")) {
-    mat = as.matrix(sf::st_drop_geometry(data))
-  } else if (inherits(data, "SpatRaster")) {
-    mat = terra::values(data, mat = TRUE)
-  } else {
-    mat = as.matrix(data)
-  }
 
   if (!(typeof(mat) %in% c("integer", "double"))) {
     stop("Non-numeric values detected in input data. 
