@@ -1,4 +1,12 @@
-.validate_var = \(data, target, source) {
+.validate_var = \(data, target, source, detrend = FALSE) {
+  var_indices = c(abs(target[1]), abs(source[1]))
+  if (inherits(data, "SpatRaster")) {
+    data = data[[var_indices]]
+  } else {
+    data = data[, var_indices, drop = FALSE]
+  }
+
+
   if (inherits(data, "sf")) {
     mat = as.matrix(sf::st_drop_geometry(data))
   } else if (inherits(data, "SpatRaster")) {
