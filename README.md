@@ -33,8 +33,7 @@ experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimenta
 install.packages("pc", dependencies = TRUE)
 ```
 
-- Install binary version from
-  [R-universe](https://stscl.r-universe.dev/pc) with:
+- Install binary version from [R-universe](https://stscl.r-universe.dev/pc) with:
 
 ``` r
 install.packages("pc",
@@ -43,8 +42,7 @@ install.packages("pc",
                  dependencies = TRUE)
 ```
 
-- Install from source code on [GitHub](https://github.com/stscl/pc)
-  with:
+- Install from source code on [GitHub](https://github.com/stscl/pc) with:
 
 ``` r
 if (!requireNamespace("pak")) {
