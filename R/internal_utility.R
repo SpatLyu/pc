@@ -4,8 +4,11 @@
     if (inherits(data, "sf")) {
       coords = as.data.frame(sdsfun::sf_coordinates(data))
     } else if (inherits(data, "SpatRaster")) {
-      coords = terra::rowColFromCell(data, seq_len(terra::ncell(data)))
+      coords = as.data.frame(
+        terra::rowColFromCell(data, seq_len(terra::ncell(data)))
+      )
     }
+    names(coords) = c("x", "y")
   }
 
   var_indices = c(abs(target[1]), abs(source[1]))
@@ -16,6 +19,7 @@
   } else {
     data = data[, var_indices, drop = FALSE]
   }
+  names(data) = c("target", "source")
   
   
 
