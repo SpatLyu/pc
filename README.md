@@ -1,4 +1,3 @@
-
 # pc <a href="https://stscl.github.io/pc/"><img src="man/figures/pc.png" align="right" hspace="5" vspace="0" width="15%" alt="pc website: https://stscl.github.io/pc/"/></a>
 
 <p align="right"; style="font-size:11px">logo by layeyo</p>
@@ -26,8 +25,7 @@ experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimenta
 series and spatial cross-sectional data. It uses symbolic pattern
 representations and cross mapping to detect directional interactions 
 and infer causal structure from temporal dynamics and spatial snapshots. 
-Built on a high-performance C++ backend with a lightweight R interface, *pc*
-provides efficient and flexible tools for data-driven causality analysis.
+Built on a high-performance C++ backend with a lightweight R interface, *pc* provides efficient and flexible tools for data-driven causality analysis.
 
 > *Refer to the package documentation <https://stscl.github.io/pc/>
 > for more detailed information.*
