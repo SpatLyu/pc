@@ -53,6 +53,8 @@ pak::pak("stscl/pc", dependencies = TRUE)
 
 ## References
 
+Sugihara, G., May, R., Ye, H., Hsieh, C., Deyle, E., Fogarty, M., Munch, S., 2012. Detecting Causality in Complex Ecosystems. Science 338, 496–500. https://doi.org/10.1126/science.1227079.
+
 Stavroglou, S.K., Pantelous, A.A., Stanley, H.E., Zuev, K.M., 2019. Hidden interactions in financial markets. Proceedings of the National Academy of Sciences 116, 10646–10651. https://doi.org/10.1073/pnas.1819449116.
 
 Stavroglou, S.K., Pantelous, A.A., Stanley, H.E., Zuev, K.M., 2020. Unveiling causal interactions in complex systems. Proceedings of the National Academy of Sciences 117, 7599–7605. https://doi.org/10.1073/pnas.1918269117.
