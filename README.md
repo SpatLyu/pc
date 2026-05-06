@@ -58,3 +58,5 @@ Stavroglou, S.K., Pantelous, A.A., Stanley, H.E., Zuev, K.M., 2019. Hidden inter
 Stavroglou, S.K., Pantelous, A.A., Stanley, H.E., Zuev, K.M., 2020. Unveiling causal interactions in complex systems. Proceedings of the National Academy of Sciences 117, 7599–7605. https://doi.org/10.1073/pnas.1918269117.
 
 Zhang, Z., Wang, J., 2025. A model to identify causality for geographic patterns. International Journal of Geographical Information Science 1–21. https://doi.org/10.1080/13658816.2025.2581207.
+
+Lyu, W., Lei, Y., Yi, W., Song, Y., Li, X., Dai, S., Qin, Y., Zhao, W., 2026. Causal discovery in urban data with temporal empirical dynamic modeling: The R package tEDM. Computers, Environment and Urban Systems 127, 102435. https://doi.org/10.1016/j.compenvurbsys.2026.102435.
