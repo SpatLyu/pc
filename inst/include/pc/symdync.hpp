@@ -595,6 +595,18 @@ namespace symdync
                     : 1.0;
             }
 
+            /* --- heatmap --- */
+            if (std::isnan(heatmap[i][j]))
+            {
+                heatmap[i][j] = strength;
+                counts[i][j] = 1;
+            }
+            else
+            {
+                heatmap[i][j] += strength;
+                counts[i][j] += 1;
+            }
+
             /* --- index lookup --- */
             auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
             auto it_j = std::lower_bound(all_patterns.begin(), all_patterns.end(), PY_pred[t]);
@@ -625,17 +637,7 @@ namespace symdync
                 }
             }
 
-            /* --- heatmap --- */
-            if (std::isnan(heatmap[i][j]))
-            {
-                heatmap[i][j] = strength;
-                counts[i][j] = 1;
-            }
-            else
-            {
-                heatmap[i][j] += strength;
-                counts[i][j] += 1;
-            }
+            
         }
 
         /* ------------------------------------------------------------
