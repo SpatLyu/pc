@@ -586,6 +586,16 @@ namespace symdync
                     : 1.0;
             }
 
+            /* --- index lookup --- */
+            auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
+            auto it_j = std::lower_bound(all_patterns.begin(), all_patterns.end(), PY_pred[t]);
+
+            if (it_i == all_patterns.end() || it_j == all_patterns.end())
+                continue;
+
+            size_t i = std::distance(all_patterns.begin(), it_i);
+            size_t j = std::distance(all_patterns.begin(), it_j);
+
             /* --- heatmap --- */
             if (std::isnan(heatmap[i][j]))
             {
@@ -597,16 +607,6 @@ namespace symdync
                 heatmap[i][j] += strength;
                 counts[i][j] += 1;
             }
-
-            /* --- index lookup --- */
-            auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
-            auto it_j = std::lower_bound(all_patterns.begin(), all_patterns.end(), PY_pred[t]);
-
-            if (it_i == all_patterns.end() || it_j == all_patterns.end())
-                continue;
-
-            size_t i = std::distance(all_patterns.begin(), it_i);
-            size_t j = std::distance(all_patterns.begin(), it_j);
 
             /* --- classification --- */
             if (save_detail)
