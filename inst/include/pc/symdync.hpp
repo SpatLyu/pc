@@ -573,6 +573,7 @@ namespace symdync
                 continue;
 
             /* --- causality existence --- */
+            bool causality_exit = PY_pred[t] == PY_real[t];
             if (PY_pred[t] != PY_real[t])
             {   
                 if (save_detail)
@@ -584,11 +585,15 @@ namespace symdync
             }
 
             /* --- strength --- */
-            double strength = weighted
-                ? std::erf(
-                    norm_ignore_nan(pred_SMy[t]) /
-                    (norm_ignore_nan(SMy[t]) + 1e-6))
-                : 1.0;
+            double strength = 0.0;
+            if (causality_exit)
+            {
+                strength = weighted
+                    ? std::erf(
+                        norm_ignore_nan(pred_SMy[t]) /
+                        (norm_ignore_nan(SMy[t]) + 1e-6))
+                    : 1.0;
+            }
 
             /* --- index lookup --- */
             auto it_i = std::lower_bound(all_patterns.begin(), all_patterns.end(), PX[t]);
