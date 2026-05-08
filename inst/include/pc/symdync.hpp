@@ -574,15 +574,6 @@ namespace symdync
 
             /* --- causality existence --- */
             bool causality_exit = PY_pred[t] == PY_real[t];
-            if (PY_pred[t] != PY_real[t])
-            {   
-                if (save_detail)
-                {
-                    res.NoCausality[t] = 1.0;
-                    res.PatternTypes.push_back(0);
-                }
-                continue;
-            }
 
             /* --- strength --- */
             double strength = 0.0;
@@ -620,7 +611,12 @@ namespace symdync
             /* --- classification --- */
             if (save_detail)
             {
-                if (i == j)
+                if (!causality_exit)
+                {
+                    res.NoCausality[t] = 1.0;
+                    res.PatternTypes.push_back(0);
+                }
+                else if (i == j)
                 {
                     res.PositiveCausality[t] = strength;
                     res.PatternTypes.push_back(1);
@@ -636,8 +632,6 @@ namespace symdync
                     res.PatternTypes.push_back(3);
                 }
             }
-
-            
         }
 
         /* ------------------------------------------------------------
