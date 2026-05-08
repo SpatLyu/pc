@@ -80,6 +80,7 @@
 #' @param h (optional) Prediction horizon.
 #' @param detrend (optional) Whether to remove the linear trend.
 #' @param nb (optional) Neighbours list.
+#' @param ... Additional arguments to absorb unused inputs in method dispatch.
 #'
 #' @return A list (when `libsizes` is `NULL`) or data.frame.
 #' If `libsizes` is `NULL`, a list with two components is returned:
