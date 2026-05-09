@@ -124,7 +124,7 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
  * - pred: A vector of indices indicating the prediction set (0-based).
  * - Rtol: A vector of relative distance thresholds (one per E1).
  * - Atol: A vector of absolute distance thresholds (one per E1).
- * - L1norm: If true, use L1 (Manhattan) distance; otherwise, use L2 (Euclidean).
+ * - dist_metric: Distance metric ("euclidean", "manhattan", "maximum".)
  * - threads: Number of threads to use for parallel computation.
  * - parallel_level: 0 for serial loop over E1, >0 for parallel loop over E1.
  *
