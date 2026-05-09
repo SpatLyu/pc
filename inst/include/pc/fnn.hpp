@@ -26,7 +26,7 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
     std::vector<int> false_flags(pred.size(), -1); // -1 means skip or invalid, 0 means not a false neighbor, 1 means false neighbor
 
     // --------------------------------------------------------------------------
-    // Step 1: Compute false nearest neighbor flag between E1 and E2 dimension
+    // Utility to compute false nearest neighbor flag between E1 and E2 dimension
     // --------------------------------------------------------------------------
     auto compute_flag = [&](size_t p) {
         size_t pidx = pred[p];
@@ -151,15 +151,18 @@ std::vector<double> fnn(const std::vector<std::vector<double>>& embedding,
     return results;  // Not enough dimensions to compute FNN
   }
 
-  if (parallel_level == 0){
+  if (parallel_level == 0)
+  {
     // Loop through E1 = 1 to max_E2 - 1
     for (size_t E1 = 1; E1 < max_E2; ++E1) {
       size_t E2 = E1 + 1;
-      double fnn_ratio = CppSingleFNN(embedding, lib, pred, E1, E2, threads_sizet,
+      double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, threads_sizet,
                                       parallel_level, Rtol[E1 - 1], Atol[E1 - 1], L1norm);
       results[E1 - 1] = fnn_ratio;
     }
-  } else {
+  } 
+  else 
+  {
     // Parallel computation
     RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
       size_t E2 = E1 + 1;
