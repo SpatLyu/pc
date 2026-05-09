@@ -70,11 +70,11 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
         // Determine if this is a false neighbor
         if (ratio > Rtol || diff > Atol) 
         {
-            false_flags[i] = 1;
+            false_flags[p] = 1;
         } 
         else 
         {
-            false_flags[i] = 0;
+            false_flags[p] = 0;
         }
     }
 
