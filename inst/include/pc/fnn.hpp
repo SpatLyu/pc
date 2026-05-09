@@ -167,10 +167,10 @@ std::vector<double> fnn(const std::vector<std::vector<double>>& embedding,
     // Parallel computation
     RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
       size_t E2 = E1 + 1;
-      double fnn_ratio = CppSingleFNN(embedding, lib, pred, E1, E2, threads_sizet,
-                                      parallel_level, Rtol[E1 - 1], Atol[E1 - 1], L1norm);
+      double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
+                                   Rtol[E1 - 1], Atol[E1 - 1], 1);
       results[E1 - 1] = fnn_ratio;
-    }, threads_sizet);
+    }, threads);
   }
 
   return results;
