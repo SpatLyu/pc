@@ -154,10 +154,11 @@ std::vector<double> fnn(const std::vector<std::vector<double>>& embedding,
   if (parallel_level == 0)
   {
     // Loop through E1 = 1 to max_E2 - 1
-    for (size_t E1 = 1; E1 < max_E2; ++E1) {
+    for (size_t E1 = 1; E1 < max_E2; ++E1) 
+    {
       size_t E2 = E1 + 1;
-      double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, threads_sizet,
-                                      parallel_level, Rtol[E1 - 1], Atol[E1 - 1], L1norm);
+      double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
+                                   Rtol[E1 - 1], Atol[E1 - 1], threads);
       results[E1 - 1] = fnn_ratio;
     }
   } 
