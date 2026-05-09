@@ -79,123 +79,25 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
         RcppThread::parallelFor(0, pred.size(), compute_flag, threads);
     }
 
-    
-
-    // After parallel section, aggregate results
+    // Aggregate results
     size_t false_count = 0, total = 0;
-    for (int flag : false_flags) {
-      if (flag >= 0) {
-        total++;
-        if (flag == 1) false_count++;
-      }
-    }
-
-    if (total > 0) {
-      return static_cast<double>(false_count) / static_cast<double>(total);
-    } else {
-      return std::numeric_limits<double>::quiet_NaN();
-    }
-
-  if (parallel_level != 0)
-  {
-    size_t false_count = 0;
-    size_t total = 0;
-
-    // Brute-force linear search
-    for (size_t i = 0; i < pred.size(); ++i) 
+    for (int flag : false_flags) 
     {
-      if (checkOneDimVectorNotNanNum(embedding[pred[i]]) == 0) {
-        continue;  // Skip rows with all NaNs
-      }
-
-      double min_dist = std::numeric_limits<double>::max();
-      size_t nn_idx = N;  // invalid index placeholder
-
-      // Find nearest neighbor of i in E1-dimensional space
-      for (size_t j = 0; j < lib.size(); ++j) {
-        if (pred[i] == lib[j] || checkOneDimVectorNotNanNum(embedding[lib[j]]) == 0) continue;
-
-        // Compute distance in E1-dimensional space
-        std::vector<double> xi(embedding[pred[i]].begin(), embedding[pred[i]].begin() + E1);
-        std::vector<double> xj(embedding[lib[j]].begin(), embedding[lib[j]].begin() + E1);
-        double dist = CppDistance(xi, xj, L1norm, true);
-
-        if (dist < min_dist) {
-          min_dist = dist;
-          nn_idx = lib[j];
-        }
-      }
-
-      if (nn_idx == N || doubleNearlyEqual(min_dist,0.0)) continue;  // skip degenerate cases
-
-      // Compare E2-th coordinate difference (new dimension)
-      double diff = std::abs(embedding[pred[i]][E2 - 1] - embedding[nn_idx][E2 - 1]);
-      double ratio = diff / min_dist;
-
-      if (ratio > Rtol || diff > Atol) {
-        ++false_count;
-      }
-      ++total;
-    }
-
-    return total > 0 ? static_cast<double>(false_count) / static_cast<double>(total)
-    : std::numeric_limits<double>::quiet_NaN();
-  } else {
-    // Parallel version: allocate one slot for each pred[i], thread-safe without locks
-    std::vector<int> false_flags(pred.size(), -1); // -1 means skip or invalid, 0 means not a false neighbor, 1 means false neighbor
-
-    RcppThread::parallelFor(0, pred.size(), [&](size_t i) {
-      int pidx = pred[i];
-      if (checkOneDimVectorNotNanNum(embedding[pidx]) == 0) return;
-
-      double min_dist = std::numeric_limits<double>::max();
-      int nn_idx = -1;
-
-      for (size_t j = 0; j < lib.size(); ++j) {
-        int lidx = lib[j];
-        if (pidx == lidx || checkOneDimVectorNotNanNum(embedding[lidx]) == 0) continue;
-
-        // Compute distance using only the first E1 dimensions
-        std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
-        std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
-        double dist = CppDistance(xi, xj, L1norm, true);
-
-        if (dist < min_dist) {
-          min_dist = dist;
-          nn_idx = lidx;
-        }
-      }
-
-      // Skip if no neighbor found or minimum distance is zero
-      if (nn_idx == -1 || doubleNearlyEqual(min_dist,0.0)) return;
-
-      // Compare the E2-th dimension to check for false neighbors
-      double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
-      double ratio = diff / min_dist;
-
-      // Determine if this is a false neighbor
-      if (ratio > Rtol || diff > Atol) {
-        false_flags[i] = 1;
-      } else {
-        false_flags[i] = 0;
-      }
-    }, threads); // use specified number of threads
-
-    // After parallel section, aggregate results
-    size_t false_count = 0, total = 0;
-    for (int flag : false_flags) {
-      if (flag >= 0) {
+      if (flag >= 0) 
+      {
         total++;
         if (flag == 1) false_count++;
       }
     }
 
-    if (total > 0) {
+    if (total > 0) 
+    {
       return static_cast<double>(false_count) / static_cast<double>(total);
-    } else {
+    } 
+    else 
+    {
       return std::numeric_limits<double>::quiet_NaN();
     }
-  }
 }
 
 /*
