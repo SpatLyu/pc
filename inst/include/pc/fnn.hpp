@@ -50,25 +50,27 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
                 if (dist < min_dist) 
                 {
                     min_dist = dist;
-                    nn_idx = lidx;
+                    nn_idx = static_cast<int>(lidx); 
                 }
             }
 
             // Skip if no neighbor found or minimum distance is zero
-            if (nn_idx == -1 || doubleNearlyEqual(min_dist,0.0)) return;
+            if (nn_idx == -1 || pc::numericutils::doubleNearlyEqual(min_dist,0.0)) return;
 
             // Compare the E2-th dimension to check for false neighbors
             double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
             double ratio = diff / min_dist;
 
             // Determine if this is a false neighbor
-            if (ratio > Rtol || diff > Atol) {
+            if (ratio > Rtol || diff > Atol) 
+            {
                 false_flags[i] = 1;
-            } else {
+            } 
+            else 
+            {
                 false_flags[i] = 0;
             }
-        }, threads); // use specified number of threads
-
+        }, threads);
     }
 
     
