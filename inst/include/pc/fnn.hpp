@@ -26,7 +26,7 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
     std::vector<int> false_flags(pred.size(), -1); // -1 means skip or invalid, 0 means not a false neighbor, 1 means false neighbor
 
     // --------------------------------------------------------------------------
-    // Step 1: Compute pairwise distances between prediction and library indices
+    // Step 1: Compute false nearest neighbor flag between E1 and E2 dimension
     // --------------------------------------------------------------------------
     auto compute_flag = [&](size_t p) {
         size_t pidx = pred[p];
