@@ -38,28 +38,29 @@
  * - A double value indicating the proportion of false nearest neighbors (0–1).
  *   If no valid pairs are found, returns NaN.
  */
-double CppSingleFNN(const std::vector<std::vector<double>>& embedding,
-                    const std::vector<size_t>& lib,
-                    const std::vector<size_t>& pred,
-                    size_t E1,
-                    size_t E2,
-                    size_t threads,
-                    int parallel_level = 0,
-                    double Rtol = 10.0,
-                    double Atol = 2.0,
-                    bool L1norm = false) {
+double singlefnn(const std::vector<std::vector<double>>& embedding,
+                 const std::vector<size_t>& lib,
+                 const std::vector<size_t>& pred,
+                 size_t E1,
+                 size_t E2,
+                 const std::string& dist_metric = "euclidean",
+                 double Rtol = 10.0,
+                 double Atol = 2.0,
+                 size_t threads = 1) {
   if (embedding.empty() || embedding[0].size() < E2) {
     return std::numeric_limits<double>::quiet_NaN();  // Invalid dimensions
   }
 
   size_t N = embedding.size();
 
-  if (parallel_level != 0){
+  if (parallel_level != 0)
+  {
     size_t false_count = 0;
     size_t total = 0;
 
     // Brute-force linear search
-    for (size_t i = 0; i < pred.size(); ++i) {
+    for (size_t i = 0; i < pred.size(); ++i) 
+    {
       if (checkOneDimVectorNotNanNum(embedding[pred[i]]) == 0) {
         continue;  // Skip rows with all NaNs
       }
