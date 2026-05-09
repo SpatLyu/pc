@@ -46,8 +46,10 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
                  const std::string& dist_metric = "euclidean",
                  double Rtol = 10.0,
                  double Atol = 2.0,
-                 size_t threads = 1) {
-  if (embedding.empty() || embedding[0].size() < E2) {
+                 size_t threads = 1) 
+{
+  if (embedding.empty() || embedding[0].size() < E2) 
+  {
     return std::numeric_limits<double>::quiet_NaN();  // Invalid dimensions
   }
 
