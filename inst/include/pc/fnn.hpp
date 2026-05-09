@@ -7,37 +7,6 @@
 #include "pc/distance.hpp"
 #include <RcppThread.h>
 
-/*
- * Compute the False Nearest Neighbors (FNN) ratio for spatial cross-sectional data.
- *
- * This function determines whether nearest neighbors identified in a lower-dimensional
- * embedded space (E1) remain close in a higher-dimensional space (E2).
- * If not, the neighbor is considered a "false" neighbor, indicating the need for
- * a higher embedding dimension to accurately capture spatial proximity.
- *
- * The FNN test is computed in two modes:
- * - parallel_level = 0: each prediction is processed in parallel using RcppThreads.
- * - parallel_level = 1: all pairwise distances are precomputed once in advance
- *   (better for repeated queries or small prediction sets).
- *
- * Parameters:
- * - embedding: A matrix (vector of vectors) representing the spatial embedding,
- *              where each row corresponds to a spatial unit's attributes.
- *              Must contain at least E2 columns.
- * - lib: Library index vector (1-based in R, converted to 0-based).
- * - pred: Prediction index vector (1-based in R, converted to 0-based).
- * - E1: The base embedding dimension used to identify the nearest neighbor (E1 < E2).
- * - E2: The full embedding dimension used to test false neighbors (usually E1 + 1).
- * - threads: Number of threads used when parallel_level = 0.
- * - parallel_level: 0 for per-pred parallelism (default), 1 for precomputed full distance matrix.
- * - Rtol: Relative threshold (default 10.0).
- * - Atol: Absolute threshold (default 2.0).
- * - L1norm: Whether to use Manhattan (L1) distance instead of Euclidean (L2).
- *
- * Returns:
- * - A double value indicating the proportion of false nearest neighbors (0–1).
- *   If no valid pairs are found, returns NaN.
- */
 double singlefnn(const std::vector<std::vector<double>>& embedding,
                  const std::vector<size_t>& lib,
                  const std::vector<size_t>& pred,
@@ -54,6 +23,70 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
   }
 
   size_t N = embedding.size();
+
+  std::vector<int> false_flags(pred.size(), -1); // -1 means skip or invalid, 0 means not a false neighbor, 1 means false neighbor
+
+  if (threads <= 1)
+  {
+
+  }
+  else 
+  {
+    RcppThread::parallelFor(0, pred.size(), [&](size_t i) {
+      int pidx = pred[i];
+      if (checkOneDimVectorNotNanNum(embedding[pidx]) == 0) return;
+
+      double min_dist = std::numeric_limits<double>::max();
+      int nn_idx = -1;
+
+      for (size_t j = 0; j < lib.size(); ++j) {
+        int lidx = lib[j];
+        if (pidx == lidx || checkOneDimVectorNotNanNum(embedding[lidx]) == 0) continue;
+
+        // Compute distance using only the first E1 dimensions
+        std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
+        std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
+        double dist = CppDistance(xi, xj, L1norm, true);
+
+        if (dist < min_dist) {
+          min_dist = dist;
+          nn_idx = lidx;
+        }
+      }
+
+      // Skip if no neighbor found or minimum distance is zero
+      if (nn_idx == -1 || doubleNearlyEqual(min_dist,0.0)) return;
+
+      // Compare the E2-th dimension to check for false neighbors
+      double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
+      double ratio = diff / min_dist;
+
+      // Determine if this is a false neighbor
+      if (ratio > Rtol || diff > Atol) {
+        false_flags[i] = 1;
+      } else {
+        false_flags[i] = 0;
+      }
+    }, threads); // use specified number of threads
+
+  }
+
+    
+
+    // After parallel section, aggregate results
+    size_t false_count = 0, total = 0;
+    for (int flag : false_flags) {
+      if (flag >= 0) {
+        total++;
+        if (flag == 1) false_count++;
+      }
+    }
+
+    if (total > 0) {
+      return static_cast<double>(false_count) / static_cast<double>(total);
+    } else {
+      return std::numeric_limits<double>::quiet_NaN();
+    }
 
   if (parallel_level != 0)
   {
