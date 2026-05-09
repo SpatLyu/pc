@@ -1,3 +1,6 @@
+#ifndef PC_FNN_HPP
+#define PC_FNN_HPP
+
 #include <vector>
 #include <cmath>
 #include <limits>
@@ -6,6 +9,12 @@
 #include "pc/numericutils.hpp"
 #include "pc/distance.hpp"
 #include <RcppThread.h>
+
+namespace pc
+{
+
+namespace fnn
+{  
 
 double singlefnn(const std::vector<std::vector<double>>& embedding,
                  const std::vector<size_t>& lib,
