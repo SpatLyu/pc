@@ -132,22 +132,22 @@ double singlefnn(const std::vector<std::vector<double>>& embedding,
  * - A vector of FNN ratios corresponding to each E1 from 1 to D - 1.
  *   If not computable for a given E1, NaN is returned at that position.
  */
-std::vector<double> CppFNN(const std::vector<std::vector<double>>& embedding,
-                           const std::vector<size_t>& lib,
-                           const std::vector<size_t>& pred,
-                           const std::vector<double>& Rtol,
-                           const std::vector<double>& Atol,
-                           const std::string& dist_metric = "euclidean",
-                           size_t threads = 1,
-                           size_t parallel_level = 0) {
+std::vector<double> fnn(const std::vector<std::vector<double>>& embedding,
+                        const std::vector<size_t>& lib,
+                        const std::vector<size_t>& pred,
+                        const std::vector<double>& Rtol,
+                        const std::vector<double>& Atol,
+                        const std::string& dist_metric = "euclidean",
+                        size_t threads = 1,
+                        size_t parallel_level = 0) {
   // Configure threads
-  size_t threads_sizet = static_cast<size_t>(std::abs(threads));
-  threads_sizet = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads_sizet);
+  threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
 
   size_t max_E2 = embedding[0].size();
   std::vector<double> results(max_E2 - 1, std::numeric_limits<double>::quiet_NaN());
 
-  if (embedding.empty() || embedding[0].size() < 2) {
+  if (embedding.empty() || embedding[0].size() < 2) 
+  {
     return results;  // Not enough dimensions to compute FNN
   }
 
