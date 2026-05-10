@@ -12,11 +12,12 @@
 // [[Rcpp::export(rng = false)]]
 Rcpp::List RcppFNN(
     const Rcpp::NumericVector& target,
-    const Rcpp::NumericVector& source,
+    const Rcpp::NumericVector& rt,
+    const Rcpp::NumericVector& eps,
     const Rcpp::IntegerVector& lib,
     const Rcpp::IntegerVector& pred,
     const Rcpp::IntegerVector& E,
-    const Rcpp::IntegerVector& tau,
+    int tau = 1,
     int style = 0,
     int num_neighbors = 4,
     int zero_tolerance = 0,
