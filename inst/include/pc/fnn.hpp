@@ -181,41 +181,42 @@ namespace fnn
                             const std::vector<double>& Atol,
                             const std::string& dist_metric = "euclidean",
                             size_t threads = 1,
-                            size_t parallel_level = 0) {
-    // Configure threads
-    threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
-
-    size_t max_E2 = embedding[0].size();
-    std::vector<double> results(max_E2 - 1, std::numeric_limits<double>::quiet_NaN());
-
-    if (embedding.empty() || embedding[0].size() < 2) 
+                            size_t parallel_level = 0) 
     {
-        return results;  // Not enough dimensions to compute FNN
-    }
+        // Configure threads
+        threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
 
-    if (parallel_level == 0)
-    {
-        // Loop through E1 = 1 to max_E2 - 1
-        for (size_t E1 = 1; E1 < max_E2; ++E1) 
+        size_t max_E2 = embedding[0].size();
+        std::vector<double> results(max_E2 - 1, std::numeric_limits<double>::quiet_NaN());
+
+        if (embedding.empty() || embedding[0].size() < 2) 
         {
-        size_t E2 = E1 + 1;
-        double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                    Rtol[E1 - 1], Atol[E1 - 1], threads);
-        results[E1 - 1] = fnn_ratio;
+            return results;  // Not enough dimensions to compute FNN
         }
-    } 
-    else 
-    {
-        // Parallel computation
-        RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
-        size_t E2 = E1 + 1;
-        double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                    Rtol[E1 - 1], Atol[E1 - 1], 1);
-        results[E1 - 1] = fnn_ratio;
-        }, threads);
-    }
 
-    return results;
+        if (parallel_level == 0)
+        {
+            // Loop through E1 = 1 to max_E2 - 1
+            for (size_t E1 = 1; E1 < max_E2; ++E1) 
+            {
+                size_t E2 = E1 + 1;
+                double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
+                                            Rtol[E1 - 1], Atol[E1 - 1], threads);
+                results[E1 - 1] = fnn_ratio;
+            }
+        } 
+        else 
+        {
+            // Parallel computation
+            RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
+                size_t E2 = E1 + 1;
+                double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
+                                            Rtol[E1 - 1], Atol[E1 - 1], 1);
+                results[E1 - 1] = fnn_ratio;
+            }, threads);
+        }
+
+        return results;
     }
 
 } // namespace fnn
