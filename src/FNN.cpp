@@ -59,7 +59,7 @@ Rcpp::NumericVector RcppFNN(
     std::vector<int> E_std = Rcpp::as<std::vector<int>>(E);
     for (auto& singleE : E_std) 
     {
-        if (singleE < 0) singleE = std::abs(singleE)
+        if (singleE < 0) singleE = std::abs(singleE);
     }
     size_t max_E = static_cast<size_t>(*std::max_element(E_std.begin(), E_std.end()));
     if (max_E < 2) max_E = 2;
