@@ -150,7 +150,7 @@ namespace fnn
             {
                 false_flags[p] = 0;
             }
-        }
+        };
 
         if (threads <= 1)
         {
