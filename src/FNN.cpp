@@ -1,6 +1,5 @@
 #include <vector>
 #include <cmath>
-#include <tuple>
 #include <limits>
 #include <string>
 #include <utility>
@@ -9,9 +8,9 @@
 #include <unordered_map>
 #include "pc.h"
 
-// Wrapper function to perform pattern causality analysis
+// Wrapper function to perform false nearest neighbor analysis
 // [[Rcpp::export(rng = false)]]
-Rcpp::List RcppPC(
+Rcpp::List RcppFNN(
     const Rcpp::NumericVector& target,
     const Rcpp::NumericVector& source,
     const Rcpp::IntegerVector& lib,
