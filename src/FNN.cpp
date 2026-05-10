@@ -27,7 +27,6 @@ Rcpp::List RcppFNN(
 {
     // --- Input Conversion and Validation ---
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
-    std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
     const size_t n_obs = tg.size();
 
     // Convert library indices (R 1-based → C++ 0-based)
