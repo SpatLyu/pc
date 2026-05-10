@@ -79,19 +79,24 @@ Rcpp::List RcppFNN(
     } 
     else 
     {
-        E_std[0] = E_vec[0];
-        E_std[1] = E_vec[1];
+        size_t src_len = rt_vec.size();
+        for (size_t i = 0; i < rt_std.size(); ++i) 
+        {
+            rt_std[i] = rt_vec[i % src_len];
+        }
     }
 
     // ---- eps ----
-    if (tau_vec.size() == 1) 
+    if (eps_vec.size() == 1) 
     {
-        std::fill(tau_std.begin(), tau_std.end(), tau_vec[0]);
+        std::fill(eps_std.begin(), eps_std.end(), eps_vec[0]);
     } 
     else 
     {
-        tau_std[0] = tau_vec[0];
-        tau_std[1] = tau_vec[1];
+        size_t src_len = eps_vec.size();
+        for (size_t i = 0; i < eps_std.size(); ++i) {
+            eps_std[i] = eps_vec[i % src_len];
+        }
     }
 
     // --- Embedding Construction ---
