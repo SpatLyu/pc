@@ -9,7 +9,7 @@
 #include "pc.h"
 
 // Wrapper function to perform false nearest neighbor analysis
-// [[Rcpp::export(rng = false)]]
+
 Rcpp::NumericVector RcppFNN(
     const Rcpp::NumericVector& target,
     const Rcpp::NumericVector& rt,
@@ -62,7 +62,7 @@ Rcpp::NumericVector RcppFNN(
         if (singleE < 0) singleE = std::abs(singleE)
     }
     size_t max_E = static_cast<size_t>(*std::max_element(E_std.begin(), E_std.end()));
-    max_E = std::max(2, max_E);
+    if (max_E < 2) max_E = 2;
 
     // Convert rt and eps
     std::vector<double> rt_vec = Rcpp::as<std::vector<double>>(rt);
