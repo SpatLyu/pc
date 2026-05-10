@@ -101,16 +101,15 @@ Rcpp::List RcppFNN(
 
     // --- Embedding Construction ---
     std::vector<std::vector<double>> Mx;
-    std::vector<std::vector<double>> My;
 
     if (nb.isNotNull()) 
     {
         // Convert Rcpp::List to std::vector<std::vector<size_t>>
         std::vector<std::vector<size_t>> nb_std = pc::convert::nb2std(nb.get());
         Mx = pc::embed::embed(
-            tg, nb_std, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-        My = pc::embed::embed(
-            sg, nb_std, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+            tg, nb_std, max_E, 
+            static_cast<size_t>(std::abs(tau)), 
+            static_cast<size_t>(std::abs(style)));
     } 
     else if (nrows.isNotNull())
     {   
@@ -119,19 +118,16 @@ Rcpp::List RcppFNN(
         std::vector<std::vector<double>> tm = 
             pc::embed::gridVec2Mat(tg, n_rows);
         Mx = pc::embed::embed(
-            tm, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-
-        std::vector<std::vector<double>> sm = 
-            pc::embed::gridVec2Mat(sg, n_rows);
-        My = pc::embed::embed(
-            sm, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+            tm, max_E, 
+            static_cast<size_t>(std::abs(tau)), 
+            static_cast<size_t>(std::abs(style)));
     }
     else  
     {
         Mx = pc::embed::embed(
-            tg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-        My = pc::embed::embed(
-            sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
+            tg, max_E, 
+            static_cast<size_t>(std::abs(tau)), 
+            static_cast<size_t>(std::abs(style)));
 
         size_t max_lag = (tau == 0) 
             ? (max_E - 1)
