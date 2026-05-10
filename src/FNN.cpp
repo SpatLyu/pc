@@ -133,11 +133,9 @@ Rcpp::List RcppFNN(
         My = pc::embed::embed(
             sg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
 
-        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
-        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
-        size_t max_lag = (max_tau == 0) 
+        size_t max_lag = (tau == 0) 
             ? (max_E - 1)
-            : ((max_E - 1) * max_tau);
+            : ((max_E - 1) * static_cast<size_t>(std::abs(tau)));
 
         lib_std.erase(
             std::remove_if(lib_std.begin(), lib_std.end(), 
