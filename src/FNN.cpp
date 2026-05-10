@@ -10,7 +10,7 @@
 
 // Wrapper function to perform false nearest neighbor analysis
 // [[Rcpp::export(rng = false)]]
-Rcpp::List RcppFNN(
+Rcpp::NumericVector RcppFNN(
     const Rcpp::NumericVector& target,
     const Rcpp::NumericVector& rt,
     const Rcpp::NumericVector& eps,
