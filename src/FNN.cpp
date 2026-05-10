@@ -72,23 +72,18 @@ Rcpp::List RcppFNN(
     std::vector<double> rt_std(max_E);
     std::vector<double> eps_std(max_E);
 
-    // ---- E ----
-    if (E_vec.size() == 1) 
+    // ---- rt ----
+    if (rt_vec.size() == 1) 
     {
-        std::fill(E_std.begin(), E_std.end(), E_vec[0]);
+        std::fill(rt_std.begin(), rt_std.end(), rt_vec[0]);
     } 
     else 
     {
         E_std[0] = E_vec[0];
         E_std[1] = E_vec[1];
     }
-    
-    // Make sure each E is greater than 2
-    for (auto& singleE : E_std) {
-        if (singleE < 2) singleE = 2;
-    }
 
-    // ---- tau ----
+    // ---- eps ----
     if (tau_vec.size() == 1) 
     {
         std::fill(tau_std.begin(), tau_std.end(), tau_vec[0]);
