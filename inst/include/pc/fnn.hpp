@@ -215,14 +215,15 @@ namespace fnn
      * - A vector of FNN ratios corresponding to each E1 from 1 to D - 1.
      *   If not computable for a given E1, NaN is returned at that position.
      *************************************************************************************/
-    std::vector<double> fnn(const std::vector<std::vector<double>>& embedding,
-                            const std::vector<size_t>& lib,
-                            const std::vector<size_t>& pred,
-                            const std::vector<double>& Rtol,
-                            const std::vector<double>& Atol,
-                            const std::string& dist_metric = "euclidean",
-                            size_t threads = 1,
-                            size_t parallel_level = 0) 
+    inline std::vector<double> fnn(
+        const std::vector<std::vector<double>>& embedding,
+        const std::vector<size_t>& lib,
+        const std::vector<size_t>& pred,
+        const std::vector<double>& Rtol,
+        const std::vector<double>& Atol,
+        const std::string& dist_metric = "euclidean",
+        size_t threads = 1,
+        size_t parallel_level = 0) 
     {
         // Configure threads
         threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
