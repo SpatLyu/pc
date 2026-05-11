@@ -1,6 +1,6 @@
 .fnn_ts = \(data, target, E = 2:10, tau = 1, style = 1, lib = NULL, pred = NULL,
             dist.metric = c("euclidean", "manhattan", "maximum"), rt = 10, eps = 2,
-            threads = length(libsizes), higher.parallel = TRUE, ...) {
+            threads = length(E), higher.parallel = TRUE, ...) {
   dist.metric = match.arg(dist.metric)
   tv = .validate_var(data, target)[[1]]
   if (is.null(lib)) lib = which(!is.na(tv))
@@ -17,7 +17,7 @@
 
 .fnn_lattice = \(data, target, E = 3:10, tau = 1, style = 1, lib = NULL, pred = NULL, 
                  dist.metric = c("euclidean", "manhattan", "maximum"), rt = 10, eps = 2,
-                 threads = length(libsizes), higher.parallel = TRUE, detrend = FALSE, nb = NULL, ...) {
+                 threads = length(E), higher.parallel = TRUE, detrend = FALSE, nb = NULL, ...) {
   if (is.null(nb)) nb = sdsfun::spdep_nb(data)
   dist.metric = match.arg(dist.metric)
   tv = .validate_var(data, target, detrend = detrend)[[1]]
@@ -35,19 +35,14 @@
 
 .fnn_grid = \(data, target, E = 3:10, tau = 1, style = 1, lib = NULL, pred = NULL, 
               dist.metric = c("euclidean", "manhattan", "maximum"), rt = 10, eps = 2, 
-              threads = length(libsizes), higher.parallel = TRUE, detrend = FALSE, ...) {
+              threads = length(E), higher.parallel = TRUE, detrend = FALSE, ...) {
   dist.metric = match.arg(dist.metric)
   tv = .validate_var(data, target, detrend = detrend)[[1]]
   if (is.null(lib)) lib = which(!is.na(tv))
   if (is.null(pred)) pred = lib
 
-  if (is.null(libsizes)) {
-    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance, dist.metric,
-                  relative, weighted, threads, 0, NULL, terra::nrow(data)))
-  } else {
-    return(RcppPCboot(tv, sv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot, random,
-                      seed, relative, weighted, threads, higher.parallel, verbose, 0, NULL, terra::nrow(data)))
-  }
+  return(RcppFNN(tv, rt, eps, lib, pred, E, tau, style, dist.metric,
+                 threads, higher.parallel, NULL, terra::nrow(data)))
 }
 
 #' Pattern Causality
