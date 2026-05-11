@@ -10,8 +10,10 @@
     }
     names(coords) = c("x", "y")
   }
-
-  var_indices = c(abs(target[1]), abs(source[1]))
+  
+  var_indices = abs(target[1])
+  if (!is.null(source)) var_indices = c(var_indices, abs(source[1]))
+  
   if (inherits(data, "sf")) {
     data = sf::st_drop_geometry(data[, var_indices, drop = FALSE])
   } else if (inherits(data, "SpatRaster")) {
