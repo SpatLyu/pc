@@ -258,9 +258,9 @@ Rcpp::NumericVector RcppFNN(
     result.names() = resnames;
 
     // Terminal-friendly hint (one-time, non-intrusive)
-    Rcpp::Rcout << "[pc] Output 'E:i' corresponds to the i-th valid embedding dimension.\n"
-                << "[pc] Input E values exceeding max embeddable dimension were truncated.\n"
-                << "[pc] Please map output indices to original E inputs before interpretation.\n";
+    Rcpp::Rcout << "[fnn] Output 'E:i' corresponds to the i-th valid embedding dimension.\n"
+                << "[fnn] Input E values exceeding max embeddable dimension were truncated.\n"
+                << "[fnn] Please map output indices to original E inputs before interpretation.\n";
 
     return result;
 }
