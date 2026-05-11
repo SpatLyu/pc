@@ -56,24 +56,16 @@
 #' @param weighted (optional) Whether to weight causal strength.
 #' @param threads (optional) Number of threads used.
 #' @param higher.parallel (optional) Whether to use a higher level of parallelism.
-#' @param verbose (optional) Whether to show the progress bar.
-#' @param h (optional) Prediction horizon.
 #' @param detrend (optional) Whether to remove the linear trend.
 #' @param nb (optional) Neighbours list.
 #' @param ... Additional arguments to absorb unused inputs in method dispatch.
 #'
-#' @return A list (when `libsizes` is `NULL`) or data.frame.
-#' If `libsizes` is `NULL`, a list with two components is returned:
-#' \describe{
-#'   \item{causality}{A data.frame containing per-sample causality results.}
-#'   \item{summary}{A data.frame summarizing overall causality metrics.}
-#' }
-#'
+#' @return A vector.
 #' @export
 #' @name fnn
 #' @aliases fnn,data.frame-method
 #' @references
-#' Stavroglou, S.K., Pantelous, A.A., Stanley, H.E., Zuev, K.M., 2020. Unveiling causal interactions in complex systems. Proceedings of the National Academy of Sciences 117, 7599–7605.
+#' Kennel, M.B., Brown, R., Abarbanel, H.D.I., 1992. Determining embedding dimension for phase-space reconstruction using a geometrical construction. Physical Review A 45, 3403–3411.
 #'
 #' @examples
 #' columbus = sf::read_sf(system.file("case/columbus.gpkg", package="spEDM"))
