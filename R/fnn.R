@@ -35,7 +35,7 @@
                  threads, higher.parallel, NULL, terra::nrow(data)))
 }
 
-#' Pattern Causality
+#' False Nearest Neighbours
 #'
 #' @param data Observation data.
 #' @param target Integer of column indice for the target variable.
@@ -77,7 +77,7 @@
 #'
 #' @examples
 #' columbus = sf::read_sf(system.file("case/columbus.gpkg", package="spEDM"))
-#' pc::fnn(columbus, 1, 3, E = 3, k = 9, threads = 1)
+#' pc::fnn(columbus, 1, 3, E = 3:5, threads = 1)
 #'
 methods::setMethod("fnn", "data.frame", .fnn_ts)
 
