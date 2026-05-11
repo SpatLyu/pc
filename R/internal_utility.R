@@ -1,4 +1,4 @@
-.validate_var = \(data, target, source, detrend = FALSE) {
+.validate_var = \(data, target, source = NULL, detrend = FALSE) {
   coords = NULL
   if (detrend) {
     if (inherits(data, "sf")) {
@@ -19,7 +19,12 @@
   } else {
     data = data[, var_indices, drop = FALSE]
   }
-  names(data) = c("target", "source")
+
+  if (is.null(source)) {
+    names(data) = "target"
+  } else {
+    names(data) = c("target", "source")
+  }
 
   if (!all(apply(data, 2, typeof) %in% c("integer", "double"))) {
     stop("Non-numeric values detected in input data. 
@@ -29,11 +34,11 @@
   res = vector("list", 2)
   if (is.null(coords)) {
     res[[1]] = data[, 1, drop = TRUE]
-    res[[2]] = data[, 2, drop = TRUE]
+    if (!is.null(source)) res[[2]] = data[, 2, drop = TRUE]
   } else {
     data = as.data.frame(cbind(data, coords))
     res[[1]] = sdsfun::rm_lineartrend("target~x+y", data = data)
-    res[[2]] = sdsfun::rm_lineartrend("source~x+y", data = data)
+    if (!is.null(source)) res[[2]] = sdsfun::rm_lineartrend("source~x+y", data = data)
   }
 
   return(res)
