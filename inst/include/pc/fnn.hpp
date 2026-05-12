@@ -112,7 +112,6 @@ namespace fnn
         {
             return std::numeric_limits<double>::quiet_NaN();  // Invalid dimensions
         }
-        size_t N = embedding.size();
 
         std::vector<int> false_flags(pred.size(), -1); // -1 means skip or invalid, 0 means not a false neighbor, 1 means false neighbor
 
@@ -124,7 +123,7 @@ namespace fnn
             
             // // Legacy 1-NN implementation retained for reference.
             // double min_dist = std::numeric_limits<double>::max();
-            // size_t nn_idx = N; // invalid index placeholder
+            // size_t nn_idx = embedding.size(); // invalid index placeholder
 
             // for (size_t j = 0; j < lib.size(); ++j) 
             // {
@@ -144,7 +143,7 @@ namespace fnn
             // }
 
             // // Skip if no neighbor found or minimum distance is zero
-            // if (nn_idx == N || pc::numericutils::doubleNearlyEqual(min_dist, 0.0)) return;
+            // if (nn_idx == embedding.size() || pc::numericutils::doubleNearlyEqual(min_dist, 0.0)) return;
 
             // // Compare the E2-th dimension to check for false neighbors
             // double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
