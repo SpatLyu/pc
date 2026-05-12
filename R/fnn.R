@@ -7,7 +7,7 @@
   if (is.null(pred)) pred = lib
 
   return(RcppFNN(tv, rt, eps, lib, pred, E, tau, style, dist.metric,
-                 threads, higher.parallel, NULL, NULL))
+                 k, threads, higher.parallel, NULL, NULL))
 }
 
 .fnn_lattice = \(data, target, E = 3:10, k = 3, tau = 1, style = 1, lib = NULL, pred = NULL, 
@@ -20,7 +20,7 @@
   if (is.null(pred)) pred = lib
 
   return(RcppFNN(tv, rt, eps, lib, pred, E, tau, style, dist.metric,
-                 threads, higher.parallel, nb, NULL))
+                 k, threads, higher.parallel, nb, NULL))
 }
 
 .fnn_grid = \(data, target, E = 3:10, k = 3, tau = 1, style = 1, lib = NULL, pred = NULL, 
@@ -32,7 +32,7 @@
   if (is.null(pred)) pred = lib
 
   return(RcppFNN(tv, rt, eps, lib, pred, E, tau, style, dist.metric,
-                 threads, higher.parallel, NULL, terra::nrow(data)))
+                 k, threads, higher.parallel, NULL, terra::nrow(data)))
 }
 
 #' False Nearest Neighbors
