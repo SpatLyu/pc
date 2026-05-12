@@ -115,43 +115,60 @@ namespace fnn
         // --------------------------------------------------------------------------
         auto compute_flag = [&](size_t p) {
             size_t pidx = pred[p];
+            
+            // // Legacy 1-NN implementation retained for reference.
+            // double min_dist = std::numeric_limits<double>::max();
+            // size_t nn_idx = N; // invalid index placeholder
 
-            double min_dist = std::numeric_limits<double>::max();
-            size_t nn_idx = N; // invalid index placeholder
+            // for (size_t j = 0; j < lib.size(); ++j) 
+            // {
+            //     size_t lidx = lib[j];
+            //     if (pidx == lidx) continue;
+
+            //     // Compute distance using only the first E1 dimensions
+            //     std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
+            //     std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
+            //     double dist = pc::distance::distance(xi, xj, dist_metric, true); 
+
+            //     if (dist < min_dist) 
+            //     {
+            //         min_dist = dist;
+            //         nn_idx = lidx; 
+            //     }
+            // }
+
+            // // Skip if no neighbor found or minimum distance is zero
+            // if (nn_idx == N || pc::numericutils::doubleNearlyEqual(min_dist, 0.0)) return;
+
+            // // Compare the E2-th dimension to check for false neighbors
+            // double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
+            // double ratio = diff / min_dist;
+
+            // // Determine if this is a false neighbor
+            // if (ratio > Rtol || diff > Atol) 
+            // {
+            //     false_flags[p] = 1;
+            // } 
+            // else 
+            // {
+            //     false_flags[p] = 0;
+            // }
+
+            std::vector<std::pair<double, size_t>> dists;
+            dists.reserve(lib.size());
 
             for (size_t j = 0; j < lib.size(); ++j) 
             {
                 size_t lidx = lib[j];
                 if (pidx == lidx) continue;
 
-                // Compute distance using only the first E1 dimensions
                 std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
                 std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
-                double dist = pc::distance::distance(xi, xj, dist_metric, true); 
-
-                if (dist < min_dist) 
-                {
-                    min_dist = dist;
-                    nn_idx = lidx; 
-                }
+                double dist = pc::distance::distance(xi, xj, dist_metric, true);
+                if (!std::isnan(dist)) dists.emplace_back(dist, lidx);
             }
 
-            // Skip if no neighbor found or minimum distance is zero
-            if (nn_idx == N || pc::numericutils::doubleNearlyEqual(min_dist, 0.0)) return;
-
-            // Compare the E2-th dimension to check for false neighbors
-            double diff = std::abs(embedding[pidx][E2 - 1] - embedding[nn_idx][E2 - 1]);
-            double ratio = diff / min_dist;
-
-            // Determine if this is a false neighbor
-            if (ratio > Rtol || diff > Atol) 
-            {
-                false_flags[p] = 1;
-            } 
-            else 
-            {
-                false_flags[p] = 0;
-            }
+            
         };
 
         if (threads <= 1)
@@ -197,7 +214,6 @@ namespace fnn
      * The FNN ratio measures how often a nearest neighbor in dimension E1 becomes
      * distant in dimension E2, suggesting that E1 is insufficient for reconstructing
      * the system.
-     *
      *
      * Parameters:
      * - embedding: A vector of vectors where each row is a unit’s embedding.
