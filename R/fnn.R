@@ -35,7 +35,7 @@
                  threads, higher.parallel, NULL, terra::nrow(data)))
 }
 
-#' False Nearest Neighbours
+#' False Nearest Neighbors
 #'
 #' @param data Observation data.
 #' @param target Integer of column indice for the target variable.
