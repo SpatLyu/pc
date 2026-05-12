@@ -14,6 +14,10 @@
 
 * Improve handling of large-scale inputs (#33).
 
+### bug fixes
+
+* Fix unintended CCM-style xmap behavior in pattern causality estimation (#52).
+
 # pc 0.1
 
 * First stable release (#24).
