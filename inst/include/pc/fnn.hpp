@@ -268,11 +268,21 @@ namespace fnn
      * each column an embedding dimension), this function evaluates the proportion
      * of false nearest neighbors (FNN) as the embedding dimension increases.
      *
-     * It iteratively calls `singlefnn` for each embedding dimension pair (E1, E2),
-     * where E1 ranges from 1 to D - 1 (D = number of columns), and E2 = E1 + 1.
-     * The FNN ratio measures how often a nearest neighbor in dimension E1 becomes
-     * distant in dimension E2, suggesting that E1 is insufficient for reconstructing
-     * the system.
+     * For each embedding dimension pair (E1, E2), where E2 = E1 + 1, the FNN ratio
+     * is computed using a k-nearest neighbor criterion. For each prediction point,
+     * the k nearest neighbors are identified in the E1-dimensional space, and their
+     * relationships are re-evaluated in the higher dimension E2.
+     *
+     * A neighbor is classified as "false" if the relative or absolute distance
+     * increase exceeds predefined thresholds. For each point, the fraction of false
+     * neighbors within its local neighborhood is computed, and a majority rule is
+     * applied to determine whether the point exhibits false nearest neighbors.
+     *
+     * The FNN ratio measures the proportion of points whose neighborhood structure
+     * is not preserved when increasing dimensionality, indicating that the lower
+     * dimension E1 is insufficient for reconstructing the system.
+     *
+     * Setting k = 1 reduces the method to the standard single nearest neighbor variant.
      *
      * Parameters:
      * - embedding: A vector of vectors where each row is a unit’s embedding.
@@ -281,11 +291,12 @@ namespace fnn
      * - pred: A vector of indices indicating the prediction set (0-based).
      * - Rtol: A vector of relative distance thresholds (one per E1).
      * - Atol: A vector of absolute distance thresholds (one per E1).
-     * - dist_metric: Distance metric ("euclidean", "manhattan", "maximum".)
+     * - dist_metric: Distance metric ("euclidean", "manhattan", "maximum")
+     * - k: Number of nearest neighbors used for evaluation
      * - threads: Number of threads to use for parallel computation.
      * - parallel_level: Parallelization strategy
-     *                        0 = `prediction point`-level parallelism
-     *                        1 = `embedding dimension`-level parallelism
+     *                        0 = prediction point-level parallelism
+     *                        1 = embedding dimension-level parallelism
      *
      * Returns:
      * - A vector of FNN ratios corresponding to each E1 from 1 to D - 1.
