@@ -21,12 +21,12 @@ print.pc_ops = \(x,...) {
 #' @noRd
 plot.pc_boot = \(x, family = "serif",
                  xbreaks = NULL, xlimits = NULL,
-                 ybreaks = seq(0, 1, by = 0.1),
-                 ylimits = c(-0.05, 1), ...){
+                 ybreaks = NULL, ylimits = NULL, ...){
   causdf = x$causality
   if (ncol(causdf) == 3) names(causdf) = c("libsizes", "type", "q50")
   if(is.null(xbreaks)) xbreaks = causdf$libsizes
   if(is.null(xlimits)) xlimits = c(min(xbreaks) - 1,max(xbreaks) + 1)
+  if(is.null(ylimits)) ylimits = range(causdf$q50) + c(-0.05, 0.05)
 
   ggplot2::ggplot(causdf, ggplot2::aes(x = libsizes, y = q50, color = type)) +
     ggplot2::geom_line(linewidth = 1.25) +
