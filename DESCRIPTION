@@ -19,6 +19,7 @@ LinkingTo:
     Rcpp,
     RcppThread
 Imports: 
+    ggplot2,
     methods,
     sdsfun,
     sf,
