@@ -27,7 +27,7 @@ plot.pc_boot = \(x, family = "serif",
   if (ncol(causdf) == 3) names(causdf) = c("libsizes", "type", "q50")
   if(is.null(xbreaks)) xbreaks = causdf$libsizes
   if(is.null(xlimits)) xlimits = c(min(xbreaks) - 1,max(xbreaks) + 1)
-  if(is.null(ylimits)) ylimits = range(causdf$q50) + c(-0.05, 0.05)
+  if(is.null(ylimits)) ylimits = c(-0.01, max(causdf$q50) + 0.05)
 
   ggplot2::ggplot(causdf, ggplot2::aes(x = libsizes, y = q50, color = type)) +
     ggplot2::geom_line(linewidth = 1.25) +
