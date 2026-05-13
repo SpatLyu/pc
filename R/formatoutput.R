@@ -42,8 +42,8 @@ plot.pc_boot = \(x, family = "serif",
     ggplot2::theme_bw(base_family = family) +
     ggplot2::theme(
       legend.position = "inside",
-      legend.justification = c(0.05,1),
-      legend.box = "horizontal",
+      legend.justification = c(0.05,0.995),
+      legend.direction = "horizontal",
       panel.grid = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(angle = 30),
       strip.text = ggplot2::element_text(face = "bold")
