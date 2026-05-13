@@ -27,8 +27,8 @@ plot.pc_single = \(x, family = "serif", ...){
     ggplot2::geom_text(ggplot2::aes(label = round(strength, 3)), vjust = -0.5) +
     ggplot2::scale_y_continuous(
       limits = c(0, max(causdf$strength) * 1.1),
-      expand = ggplot2::expansion(mult = c(0, 0.1),
-      name = "Causal Strength")) +
+      expand = ggplot2::expansion(mult = c(0, 0.1)),
+      name = "Causal Strength") +
     ggplot2::scale_fill_manual(values = c("dark" = "#6A0DAD", 
                                           "negative" = "#FF4136", 
                                           "positive" = "#0074D9")) +
