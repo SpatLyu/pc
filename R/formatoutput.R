@@ -27,7 +27,7 @@ plot.pc_boot = \(x, family = "serif",
   if (ncol(causdf) == 3) names(causdf) = c("libsizes", "type", "q50")
   if(is.null(xbreaks)) xbreaks = causdf$libsizes
   if(is.null(xlimits)) xlimits = c(min(xbreaks) - 1,max(xbreaks) + 1)
-  if(is.null(ylimits)) ylimits = c(-0.01, max(causdf$q50) + 0.05)
+  if(is.null(ylimits)) ylimits = c(-0.01, max(causdf$q50) + 0.1)
 
   ggplot2::ggplot(causdf, ggplot2::aes(x = libsizes, y = q50, color = type)) +
     ggplot2::geom_line(linewidth = 1.25) +
@@ -41,7 +41,8 @@ plot.pc_boot = \(x, family = "serif",
                                 expand = c(0, 0), name = "Causal Strength") +
     ggplot2::theme_bw(base_family = family) +
     ggplot2::theme(
-      legend.position = "bottom",
+      legend.position = "inside",
+      legend.justification = c(0.05,1),
       legend.box = "horizontal",
       panel.grid = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(angle = 30),
