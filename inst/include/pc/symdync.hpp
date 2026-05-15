@@ -422,8 +422,7 @@ namespace symdync
     };
 
     /**
-     * Compute pattern causality from Y to X.
-     *
+     * Compute pattern causality from X to Y.
      *
      * Pipeline:
      *
