@@ -46,7 +46,7 @@ namespace projection
      *
      * This function performs local weighted prediction in the signature space as follows:
      *   1. For each prediction index `p` in `pred_indices`, find its `num_neighbors` nearest neighbors
-     *      among `lib_indices` based on distances in `Dx[p][*]`, ignoring NaN distances.
+     *      among `lib_indices` based on distances in `Dx[p][*]`, ignoring NaN distances and `p` itself.
      *   2. Compute exponential weights scaled by the total distance sum to emphasize close points.
      *      If all distances are zero, uniform weights are used instead.
      *   3. For each dimension of the signature space:
