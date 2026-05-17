@@ -237,9 +237,6 @@ namespace patcaus
     // --------------------------------------------------------------------------
     threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
 
-    // Enforce boot = 1 for deterministic sampling
-    if (!random_sample) boot = 1;
-
     // Prebuild 64-bit RNG pool for reproducibility
     std::vector<std::mt19937_64> rng_pool(boot);
     for (size_t i = 0; i < boot; ++i) {
