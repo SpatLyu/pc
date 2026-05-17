@@ -224,7 +224,7 @@ namespace patcaus
         const size_t& h = 0,
         const std::string& dist_metric = "euclidean",
         size_t boot = 99,
-        bool random_sample = true,
+        bool replace_sample = true,
         unsigned long long seed = 42,
         bool relative = true,
         bool weighted = true,
