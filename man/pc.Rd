@@ -156,7 +156,7 @@ print(p1)
 plot(p1)
 
 # convergence diagnostics
-p2 = pc::pc(crash, 1, 2, libsizes = seq(10,172,20), E = 8, k = 8, threads = 2)
+p2 = pc::pc(crash, 1, 2, libsizes = seq(10,172,20), E = 8, k = 8, threads = 1)
 print(p2)
 plot(p2)
 
