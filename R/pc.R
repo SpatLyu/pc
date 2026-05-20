@@ -89,7 +89,7 @@
 #'
 #' @examples
 #' crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
-#' pc::pc(crash, 1, 2, E = 3, k = 5, threads = 1)
+#' pc::pc(crash, 1, 2, E = 8, k = 8, threads = 1)
 #'
 methods::setMethod("pc", "data.frame", .pc_ts)
 
