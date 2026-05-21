@@ -166,7 +166,7 @@ namespace distance
     inline double distance(
         const std::vector<double>& vec,
         const double scalar,
-        std::string method = "euclidean",
+        const std::string& method = "euclidean",
         bool na_rm = true)
     {
         if (vec.empty() || std::isnan(scalar))
@@ -225,7 +225,7 @@ namespace distance
     inline double distance(
         const double scalar,
         const std::vector<double>& vec,
-        std::string method = "euclidean",
+        const std::string& method = "euclidean",
         bool na_rm = true)
     {
         return distance(vec, scalar, method, na_rm);
