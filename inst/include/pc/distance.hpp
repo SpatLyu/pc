@@ -263,7 +263,7 @@ namespace distance
     inline double distance(
         const std::vector<double>& vec1,
         const std::vector<double>& vec2,
-        std::string method = "euclidean",
+        const std::string& method = "euclidean",
         bool na_rm = true)
     {   
         if (vec1.empty() || vec2.empty() || vec1.size() != vec2.size())
