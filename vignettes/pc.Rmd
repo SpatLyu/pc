@@ -14,10 +14,13 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "man/figures/pc/"
 )
 ```
 
-```{r setup}
-library(pc)
-```
+## Model principles
+
+The methodological details are pending peer review and will be made available thereafter.
+
+## Usage examples
