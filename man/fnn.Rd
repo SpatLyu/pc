@@ -10,7 +10,7 @@
 \S4method{fnn}{data.frame}(
   data,
   target,
-  E = 2:10,
+  E = 10,
   k = 1,
   tau = 1,
   style = 1,
@@ -27,7 +27,7 @@
 \S4method{fnn}{sf}(
   data,
   target,
-  E = 3:10,
+  E = 10,
   k = 1,
   tau = 1,
   style = 1,
@@ -46,7 +46,7 @@
 \S4method{fnn}{SpatRaster}(
   data,
   target,
-  E = 3:10,
+  E = 10,
   k = 1,
   tau = 1,
   style = 1,
