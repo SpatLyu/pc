@@ -65,6 +65,7 @@ namespace patcaus
      *      weighted        : Use weighted pattern comparison
      *      threads         : Number of threads for parallel execution
      *      save_detail     : Make per-sample causality output
+     *      na_comp         : Adjust distance for missing values (TRUE/FALSE)
      **********************************************************************************/
     inline pc::symdync::PatternCausalityRes patcaus(
         const std::vector<std::vector<double>>& Mx,
@@ -78,7 +79,8 @@ namespace patcaus
         bool relative = true,
         bool weighted = true,
         size_t threads = 1,
-        bool save_detail = true)
+        bool save_detail = true,
+        bool na_comp = true)
     {
     // Configure threads (cap at hardware concurrency)
     threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
@@ -99,7 +101,7 @@ namespace patcaus
         {   
             if (pi == li) continue;
 
-            double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true);
+            double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true, na_comp);
             if (!std::isnan(dist)) 
             {
                 Dx[pi][li] = dist;  // assign distance; no mirroring required
@@ -192,6 +194,7 @@ namespace patcaus
      *                        0 = projection-level parallelism
      *                        1 = bootstrap-level parallelism
      *      verbose         : Show progress bar
+     *      na_comp         : Adjust distance for missing values (TRUE/FALSE)
      *
      *  Returns:
      *      3D array [3 × libsizes × boot]:
@@ -230,7 +233,8 @@ namespace patcaus
         bool weighted = true,
         size_t threads = 1,
         size_t parallel_level = 0,
-        bool verbose = false)
+        bool verbose = false,
+        bool na_comp = true)
     {
     // --------------------------------------------------------------------------
     // Step 1: Configure threads and random generators
@@ -258,7 +262,7 @@ namespace patcaus
         {   
             if (pi == li) continue;
 
-            double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true);
+            double dist = pc::distance::distance(Mx[pi], Mx[li], dist_metric, true, na_comp);
             if (!std::isnan(dist)) 
             {
                 Dx[pi][li] = dist;  // assign distance; no mirroring required

@@ -27,7 +27,8 @@ Rcpp::List RcppPC(
     int threads = 1,
     int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
-    Rcpp::Nullable<int> nrows = R_NilValue)
+    Rcpp::Nullable<int> nrows = R_NilValue,
+    bool na_comp = true)
 {
     // --- Input Conversion and Validation ---
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
@@ -214,7 +215,8 @@ Rcpp::List RcppPC(
             static_cast<size_t>(std::abs(zero_tolerance)),
             static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
-            static_cast<size_t>(std::abs(threads)), true);
+            static_cast<size_t>(std::abs(threads)), 
+            true, na_comp);
     }
     else
     {   
@@ -260,7 +262,8 @@ Rcpp::List RcppPC(
             static_cast<size_t>(std::abs(zero_tolerance)),
             static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
-            static_cast<size_t>(std::abs(threads)), true);
+            static_cast<size_t>(std::abs(threads)), 
+            true, na_comp);
     }
 
     // --- Create DataFrame for per-sample causality ---
@@ -353,7 +356,8 @@ Rcpp::List RcppPCboot(
     bool verbose = false,
     int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
-    Rcpp::Nullable<int> nrows = R_NilValue)
+    Rcpp::Nullable<int> nrows = R_NilValue,
+    bool na_comp = true)
 {
     // --- Input Conversion and Validation --------------------------------------
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
@@ -557,7 +561,7 @@ Rcpp::List RcppPCboot(
             static_cast<size_t>(std::abs(boot)), replace_sampling, 
             static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
-            static_cast<size_t>(std::abs(parallel_level)), verbose);
+            static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }
     else
     {   
@@ -605,7 +609,7 @@ Rcpp::List RcppPCboot(
             static_cast<size_t>(std::abs(boot)), replace_sampling, 
             static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
-            static_cast<size_t>(std::abs(parallel_level)), verbose);
+            static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }    
 
     // --- Result Processing -----------------------------------------------------
@@ -886,7 +890,8 @@ Rcpp::List RcppPCops(
     int parallel_level = 0,
     int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
-    Rcpp::Nullable<int> nrows = R_NilValue)
+    Rcpp::Nullable<int> nrows = R_NilValue,
+    bool na_comp = true)
 {
     // Input Conversion and Validation --------------------------------------
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
@@ -1112,7 +1117,8 @@ Rcpp::List RcppPCops(
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), false);
+                    static_cast<size_t>(std::abs(threads)), 
+                    false, na_comp);
             }
             else
             {
@@ -1135,7 +1141,8 @@ Rcpp::List RcppPCops(
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), false);
+                    static_cast<size_t>(std::abs(threads)), 
+                    false, na_comp);
             }
 
             result[i][0] = Ei;
@@ -1194,7 +1201,8 @@ Rcpp::List RcppPCops(
                     Mx, My, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
-                    dist_metric, relative, weighted, 1, false);
+                    dist_metric, relative, weighted, 1, 
+                    false, na_comp);
             }
             else
             {
@@ -1216,7 +1224,8 @@ Rcpp::List RcppPCops(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
-                    dist_metric, relative, weighted, 1, false);
+                    dist_metric, relative, weighted, 1, 
+                    false, na_comp);
             }
 
             result[i][0] = Ei;

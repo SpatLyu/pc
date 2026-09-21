@@ -24,7 +24,8 @@ Rcpp::NumericVector RcppFNN(
     int threads = 1,
     int parallel_level = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
-    Rcpp::Nullable<int> nrows = R_NilValue)
+    Rcpp::Nullable<int> nrows = R_NilValue,
+    bool na_comp = true)
 {
     // --- Input Conversion and Validation ---
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
@@ -199,7 +200,7 @@ Rcpp::NumericVector RcppFNN(
             Mx, lib_std, pred_std, rt_std, eps_std, dist_metric,
             static_cast<size_t>(std::abs(k)), 
             static_cast<size_t>(std::abs(threads)), 
-            static_cast<size_t>(std::abs(parallel_level)));
+            static_cast<size_t>(std::abs(parallel_level)), na_comp);
     }
     else
     {   
@@ -239,7 +240,7 @@ Rcpp::NumericVector RcppFNN(
             Mx_sub, lib_std, pred_std, rt_std, eps_std, dist_metric,
             static_cast<size_t>(std::abs(k)), 
             static_cast<size_t>(std::abs(threads)), 
-            static_cast<size_t>(std::abs(parallel_level)));
+            static_cast<size_t>(std::abs(parallel_level)), na_comp);
     }
 
     // Convert the result back to Rcpp::NumericVector and set names as "E:1", "E:2", ..., "E:n"

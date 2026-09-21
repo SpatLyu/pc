@@ -2,7 +2,7 @@
             normalize = FALSE, threads = length(tau), ...) {
   tv = .validate_var(data, target)[[1]]
   if (is.null(pred)) pred = which(!is.na(tv))
-  return(RcppDMI(tv, tau, pred, k, 0, base, normalize, threads))
+  return(RcppDMI(tv, tau, pred, k, 0, base, TRUE, normalize, threads))
 }
 
 #' Delayed Mutual Information

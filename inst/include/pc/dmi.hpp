@@ -68,6 +68,7 @@ namespace dmi
         size_t k = 3,
         size_t alg = 0,
         double base = 2.0,
+        bool na_comp = true,
         bool normalize = false,
         size_t threads = 1) 
     {
@@ -125,6 +126,7 @@ namespace dmi
                     k,
                     alg,
                     base,
+                    na_comp,
                     normalize
                 );
             }
@@ -139,6 +141,7 @@ namespace dmi
                     k,
                     alg,
                     base,
+                    na_comp,
                     normalize
                 );
             }, threads);

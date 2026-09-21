@@ -91,6 +91,7 @@ namespace fnn
      *      Rtol        : Relative distance threshold
      *      Atol        : Absolute distance threshold
      *      threads     : Number of threads for parallel computation
+     *      na_comp     : Adjust distance for missing values (TRUE/FALSE)
      *
      *  Returns:
      *      Proportion of false nearest neighbors (double)
@@ -106,7 +107,8 @@ namespace fnn
         size_t k = 3,
         double Rtol = 10.0,
         double Atol = 2.0,
-        size_t threads = 1) 
+        size_t threads = 1,
+        bool na_comp = true) 
     {
         if (embedding.empty() || embedding[0].size() < E2) 
         {
@@ -133,7 +135,7 @@ namespace fnn
             //     // Compute distance using only the first E1 dimensions
             //     std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
             //     std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
-            //     double dist = pc::distance::distance(xi, xj, dist_metric, true); 
+            //     double dist = pc::distance::distance(xi, xj, dist_metric, true, na_comp); 
 
             //     if (dist < min_dist) 
             //     {
@@ -173,7 +175,7 @@ namespace fnn
                 std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
                 std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
 
-                double dist = pc::distance::distance(xi, xj, dist_metric, true);
+                double dist = pc::distance::distance(xi, xj, dist_metric, true, na_comp);
                 if (!std::isnan(dist)) dists.emplace_back(dist, lidx);
             }
 
@@ -296,6 +298,7 @@ namespace fnn
      * - parallel_level: Parallelization strategy
      *                        0 = prediction point-level parallelism
      *                        1 = embedding dimension-level parallelism
+     * - na_comp: Adjust distance for missing values (TRUE/FALSE)
      *
      * Returns:
      * - A vector of FNN ratios corresponding to each E1 from 1 to D - 1.
@@ -310,7 +313,8 @@ namespace fnn
         const std::string& dist_metric = "euclidean",
         size_t k = 3,
         size_t threads = 1,
-        size_t parallel_level = 0) 
+        size_t parallel_level = 0,
+        bool na_comp = true) 
     {
         // Configure threads
         threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
@@ -330,7 +334,7 @@ namespace fnn
             {
                 size_t E2 = E1 + 1;
                 double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                             k, Rtol[E1 - 1], Atol[E1 - 1], threads);
+                                             k, Rtol[E1 - 1], Atol[E1 - 1], threads, na_comp);
                 results[E1 - 1] = fnn_ratio;
             }
         } 
@@ -339,7 +343,7 @@ namespace fnn
             RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
                 size_t E2 = E1 + 1;
                 double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                             k, Rtol[E1 - 1], Atol[E1 - 1], 1);
+                                             k, Rtol[E1 - 1], Atol[E1 - 1], 1, na_comp);
                 results[E1 - 1] = fnn_ratio;
             }, threads);
         }
