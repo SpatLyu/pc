@@ -59,7 +59,6 @@ namespace patcaus
      *      pred_indices    : Indices used for prediction
      *      num_neighbors   : Number of nearest neighbors (0 = auto)
      *      zero_tolerance  : Threshold for zero-distance handling
-     *      h               : Prediction horizon
      *      dist_metric     : Distance metric ("euclidean", "manhattan", "maximum".)
      *      relative        : Use relative symbolic encoding
      *      weighted        : Use weighted pattern comparison
@@ -74,7 +73,6 @@ namespace patcaus
         const std::vector<size_t>& pred_indices,
         const size_t& num_neighbors = 0,
         const size_t& zero_tolerance = 0,
-        const size_t& h = 0,
         const std::string& dist_metric = "euclidean",
         bool relative = true,
         bool weighted = true,
@@ -130,7 +128,7 @@ namespace patcaus
     // Step 3: Predict target signatures for My using local projections
     // --------------------------------------------------------------------------
     std::vector<std::vector<double>> PredSMy = pc::projection::projection(
-        SMy, Dx, lib_indices, pred_indices, num_neighbors, zero_tolerance, h, threads);
+        SMy, Dx, lib_indices, pred_indices, num_neighbors, zero_tolerance, threads);
 
     // --------------------------------------------------------------------------
     // Step 4: Compute pattern-based causality using symbolic pattern comparison
@@ -182,7 +180,6 @@ namespace patcaus
      *      pred_indices    : Prediction indices
      *      num_neighbors   : Number of nearest neighbors
      *      zero_tolerance  : Zero-distance handling threshold
-     *      h               : Prediction horizon
      *      dist_metric     : Distance metric
      *      boot            : Number of bootstrap replicates
      *      random_sample   : Whether to randomly sample library
@@ -224,7 +221,6 @@ namespace patcaus
         const std::vector<size_t>& pred_indices,
         const size_t& num_neighbors = 0,
         const size_t& zero_tolerance = 0,
-        const size_t& h = 0,
         const std::string& dist_metric = "euclidean",
         size_t boot = 99,
         bool replace_sampling = true,
@@ -335,9 +331,9 @@ namespace patcaus
 
             std::vector<std::vector<double>> PredSMy;
             if (parallel_level == 0)
-                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, threads);
+                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, threads);
             else
-                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, h, 1);
+                PredSMy = pc::projection::projection(SMy, Dx, sampled_lib, pred_indices, num_neighbors, zero_tolerance, 1);
 
             pc::symdync::PatternCausalityRes res;
             if (!use_subset)

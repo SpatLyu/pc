@@ -127,26 +127,124 @@ Rcpp::List RcppPC(
     {
         Mx = pc::embed::embed(
             sg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+
         My = pc::embed::embed(
             tg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
 
+        // Compute the maximum embedding lag according to embed().
         size_t max_E = *std::max_element(E_std.begin(), E_std.end());
         size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
-        size_t max_lag = (max_tau == 0) 
-            ? (max_E - 1)
-            : ((max_E - 1) * max_tau);
 
+        size_t max_lag;
+
+        if (max_tau == 0) {
+            // embed(): lag = 0, 1, ..., E - 1
+            max_lag = max_E - 1;
+        } else if (style == 0) {
+            // embed(): lag = 0, tau, ..., (E - 1) * tau
+            max_lag = (max_E - 1) * max_tau;
+        } else {
+            // embed(): lag = tau, 2 * tau, ..., E * tau
+            max_lag = max_E * max_tau;
+        }
+
+        // Remove the first max_lag rows containing NA values.
+        if (max_lag > 0) {
+            if (Mx.size() > max_lag) {
+                Mx.erase(Mx.begin(), Mx.begin() + max_lag);
+            } else {
+                Mx.clear();
+            }
+
+            if (My.size() > max_lag) {
+                My.erase(My.begin(), My.begin() + max_lag);
+            } else {
+                My.clear();
+            }
+        }
+
+        // Check whether the embedding matrices remain valid.
+        if (Mx.empty() || My.empty()) {
+            Rcpp::stop(
+                "Embedding matrices are empty after removing the initial "
+                "invalid observations."
+            );
+        }
+
+        // Apply prediction horizon h.
+        size_t h_abs = static_cast<size_t>(std::abs(h));
+
+        if (h_abs > 0) {
+            if (h_abs >= n_obs - 1 - max_lag -
+                static_cast<size_t>(std::abs(num_neighbors))) {
+                Rcpp::stop(
+                    "Prediction horizon h is too large for the available "
+                    "observations after embedding."
+                );
+            }
+            Mx.erase(Mx.end() - h_abs, Mx.end());
+            My.erase(My.begin(), My.begin() + h_abs);
+        }
+
+        // Check again after applying the prediction horizon.
+        if (Mx.empty() || My.empty()) {
+            Rcpp::stop(
+                "Embedding matrices are empty after applying the "
+                "prediction horizon."
+            );
+        }
+
+        // Remove indices before the valid embedding range and
+        // shift the remaining indices after removing max_lag rows.
         lib_std.erase(
-            std::remove_if(lib_std.begin(), lib_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            lib_std.end()
-        );
+            std::remove_if(
+                lib_std.begin(), lib_std.end(),
+                [&](size_t idx) {
+                    return idx < max_lag;
+                }),
+            lib_std.end());
+
+        for (size_t& idx : lib_std) {
+            idx -= max_lag;
+        }
 
         pred_std.erase(
-            std::remove_if(pred_std.begin(), pred_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            pred_std.end()
-        );
+            std::remove_if(
+                pred_std.begin(), pred_std.end(),
+                [&](size_t idx) {
+                    return idx < max_lag;
+                }),
+            pred_std.end());
+
+        for (size_t& idx : pred_std) {
+            idx -= max_lag;
+        }
+
+        // Remove indices that are outside the processed embedding matrices.
+
+        lib_std.erase(
+            std::remove_if(
+                lib_std.begin(), lib_std.end(),
+                [&](size_t idx) {
+                    return idx >= Mx.size();
+                }),
+            lib_std.end());
+
+        pred_std.erase(
+            std::remove_if(
+                pred_std.begin(), pred_std.end(),
+                [&](size_t idx) {
+                    return idx >= Mx.size();
+                }),
+            pred_std.end());
+
+        // Ensure that valid library and prediction indices remain.
+        if (lib_std.empty() || pred_std.empty()) {
+            Rcpp::stop(
+                "No valid library or prediction indices remain after "
+                "embedding and applying the prediction horizon."
+            );
+        }
     }
 
     // ---- sort + unique lib/pred ----
@@ -213,7 +311,6 @@ Rcpp::List RcppPC(
             Mx, My, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
             static_cast<size_t>(std::abs(threads)), 
             true, na_comp);
@@ -260,7 +357,6 @@ Rcpp::List RcppPC(
             Mx_sub, My_sub, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
             static_cast<size_t>(std::abs(threads)), 
             true, na_comp);
@@ -456,26 +552,124 @@ Rcpp::List RcppPCboot(
     {
         Mx = pc::embed::embed(
             sg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
+
         My = pc::embed::embed(
             tg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
 
+        // Compute the maximum embedding lag according to embed().
         size_t max_E = *std::max_element(E_std.begin(), E_std.end());
         size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
-        size_t max_lag = (max_tau == 0) 
-            ? (max_E - 1)
-            : ((max_E - 1) * max_tau);
 
+        size_t max_lag;
+
+        if (max_tau == 0) {
+            // embed(): lag = 0, 1, ..., E - 1
+            max_lag = max_E - 1;
+        } else if (style == 0) {
+            // embed(): lag = 0, tau, ..., (E - 1) * tau
+            max_lag = (max_E - 1) * max_tau;
+        } else {
+            // embed(): lag = tau, 2 * tau, ..., E * tau
+            max_lag = max_E * max_tau;
+        }
+
+        // Remove the first max_lag rows containing NA values.
+        if (max_lag > 0) {
+            if (Mx.size() > max_lag) {
+                Mx.erase(Mx.begin(), Mx.begin() + max_lag);
+            } else {
+                Mx.clear();
+            }
+
+            if (My.size() > max_lag) {
+                My.erase(My.begin(), My.begin() + max_lag);
+            } else {
+                My.clear();
+            }
+        }
+
+        // Check whether the embedding matrices remain valid.
+        if (Mx.empty() || My.empty()) {
+            Rcpp::stop(
+                "Embedding matrices are empty after removing the initial "
+                "invalid observations."
+            );
+        }
+
+        // Apply prediction horizon h.
+        size_t h_abs = static_cast<size_t>(std::abs(h));
+
+        if (h_abs > 0) {
+            if (h_abs >= n_obs - 1 - max_lag -
+                static_cast<size_t>(std::abs(num_neighbors))) {
+                Rcpp::stop(
+                    "Prediction horizon h is too large for the available "
+                    "observations after embedding."
+                );
+            }
+            Mx.erase(Mx.end() - h_abs, Mx.end());
+            My.erase(My.begin(), My.begin() + h_abs);
+        }
+
+        // Check again after applying the prediction horizon.
+        if (Mx.empty() || My.empty()) {
+            Rcpp::stop(
+                "Embedding matrices are empty after applying the "
+                "prediction horizon."
+            );
+        }
+
+        // Remove indices before the valid embedding range and
+        // shift the remaining indices after removing max_lag rows.
         lib_std.erase(
-            std::remove_if(lib_std.begin(), lib_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            lib_std.end()
-        );
+            std::remove_if(
+                lib_std.begin(), lib_std.end(),
+                [&](size_t idx) {
+                    return idx < max_lag;
+                }),
+            lib_std.end());
+
+        for (size_t& idx : lib_std) {
+            idx -= max_lag;
+        }
 
         pred_std.erase(
-            std::remove_if(pred_std.begin(), pred_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
-            pred_std.end()
-        );
+            std::remove_if(
+                pred_std.begin(), pred_std.end(),
+                [&](size_t idx) {
+                    return idx < max_lag;
+                }),
+            pred_std.end());
+
+        for (size_t& idx : pred_std) {
+            idx -= max_lag;
+        }
+
+        // Remove indices that are outside the processed embedding matrices.
+
+        lib_std.erase(
+            std::remove_if(
+                lib_std.begin(), lib_std.end(),
+                [&](size_t idx) {
+                    return idx >= Mx.size();
+                }),
+            lib_std.end());
+
+        pred_std.erase(
+            std::remove_if(
+                pred_std.begin(), pred_std.end(),
+                [&](size_t idx) {
+                    return idx >= Mx.size();
+                }),
+            pred_std.end());
+
+        // Ensure that valid library and prediction indices remain.
+        if (lib_std.empty() || pred_std.empty()) {
+            Rcpp::stop(
+                "No valid library or prediction indices remain after "
+                "embedding and applying the prediction horizon."
+            );
+        }
     }
 
     // ---- sort + unique lib/pred ----
@@ -557,9 +751,8 @@ Rcpp::List RcppPCboot(
             Mx, My, valid_libsizes, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)), dist_metric, 
-            static_cast<size_t>(std::abs(boot)), replace_sampling, 
-            static_cast<unsigned long long>(std::abs(seed)),
+            dist_metric, static_cast<size_t>(std::abs(boot)), 
+            replace_sampling, static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
             static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }
@@ -605,9 +798,8 @@ Rcpp::List RcppPCboot(
             Mx_sub, My_sub, valid_libsizes, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)), dist_metric, 
-            static_cast<size_t>(std::abs(boot)), replace_sampling, 
-            static_cast<unsigned long long>(std::abs(seed)),
+            dist_metric, static_cast<size_t>(std::abs(boot)), 
+            replace_sampling, static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
             static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }    
@@ -956,10 +1148,37 @@ Rcpp::List RcppPCops(
         }
     }
 
+    // Compute the maximum embedding lag for time series
+    size_t max_E = *std::max_element(Es.begin(), Es.end());
+    size_t max_tau = *std::max_element(taus.begin(), taus.end());
+
+    size_t max_lag;
+    if (max_tau == 0) {
+        // embed(): lag = 0, 1, ..., E - 1
+        max_lag = max_E - 1;
+    } else if (style == 0) {
+        // embed(): lag = 0, tau, ..., (E - 1) * tau
+        max_lag = (max_E - 1) * max_tau;
+    } else {
+        // embed(): lag = tau, 2 * tau, ..., E * tau
+        max_lag = max_E * max_tau;
+    }
+
+    // Prepare prediction horizon h.
+    size_t h_abs = static_cast<size_t>(std::abs(h));
+    size_t max_k = *std::max_element(ks.begin(), ks.end());
+    if (h_abs >= n_obs - 1 - max_lag - max_k) {
+        Rcpp::stop(
+            "Prediction horizon h is too large for the available "
+            "observations after embedding."
+        );
+    }
+
     // Process necessay data
     std::vector<std::vector<size_t>> nb_std;
     std::vector<std::vector<double>> tm;
     std::vector<std::vector<double>> sm;
+
     if (nb.isNotNull()) 
     {   
         // Convert Rcpp::List to std::vector<std::vector<size_t>>
@@ -973,23 +1192,39 @@ Rcpp::List RcppPCops(
     }
     else  
     {
-        size_t max_E = *std::max_element(Es.begin(), Es.end());
-        size_t max_tau = *std::max_element(taus.begin(), taus.end());
-        size_t max_lag = (max_tau == 0) 
-            ? (max_E - 1)
-            : ((max_E - 1) * max_tau);
-
         lib_std.erase(
             std::remove_if(lib_std.begin(), lib_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
+                [&](size_t idx){ return idx < max_lag; }),
                 lib_std.end()
         );
 
         pred_std.erase(
             std::remove_if(pred_std.begin(), pred_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
+                [&](size_t idx){ return idx < max_lag; }),
                     pred_std.end()
         );
+
+        if (h_abs > 0) 
+        {
+            // Remove indices that corresponding to time shift (the h).
+            const size_t n_valid = n_obs - h_abs;
+
+            lib_std.erase(
+                std::remove_if(
+                    lib_std.begin(), lib_std.end(),
+                    [&](size_t idx) {
+                        return idx >= n_valid;
+                    }),
+                lib_std.end());
+
+            pred_std.erase(
+                std::remove_if(
+                    pred_std.begin(), pred_std.end(),
+                    [&](size_t idx) {
+                        return idx >= n_valid;
+                    }),
+                pred_std.end());
+        }
     }
 
     // ---- sort + unique lib/pred ----
@@ -1103,7 +1338,7 @@ Rcpp::List RcppPCops(
                 Mx = pc::embed::embed(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
                 My = pc::embed::embed(
-                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));
+                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));                
             }
 
             // --- Perform Pattern Causality Analysis ---
@@ -1115,7 +1350,6 @@ Rcpp::List RcppPCops(
                 res = pc::patcaus::patcaus(
                     Mx, My, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
                     static_cast<size_t>(std::abs(threads)), 
                     false, na_comp);
@@ -1132,14 +1366,18 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    My_sub.push_back(My[idx]);
+                    if (nb.isNotNull() || nrows.isNotNull() || h_abs == 0) 
+                    {
+                        My_sub.push_back(My[idx]);
+                    } else {
+                        My_sub.push_back(My[idx + h_abs]);
+                    }
                 }
 
                 // --- Run patcaus on subset ---
                 res = pc::patcaus::patcaus(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
                     static_cast<size_t>(std::abs(threads)), 
                     false, na_comp);
@@ -1180,7 +1418,6 @@ Rcpp::List RcppPCops(
             {   
                 Mx = pc::embed::embed(
                     sm, Ei, taui, static_cast<size_t>(std::abs(style)));
-
                 My = pc::embed::embed(
                     tm, Ei, taui, static_cast<size_t>(std::abs(style)));
             }
@@ -1199,8 +1436,7 @@ Rcpp::List RcppPCops(
                 // --- Full data: no slicing needed ---
                 res = pc::patcaus::patcaus(
                     Mx, My, lib_std, pred_std, ki,
-                    static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
+                    static_cast<size_t>(std::abs(zero_tolerance)),    
                     dist_metric, relative, weighted, 1, 
                     false, na_comp);
             }
@@ -1216,14 +1452,18 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    My_sub.push_back(My[idx]);
+                    if (nb.isNotNull() || nrows.isNotNull() || h_abs == 0) 
+                    {
+                        My_sub.push_back(My[idx]);
+                    } else {
+                        My_sub.push_back(My[idx + h_abs]);
+                    }
                 }
 
                 // --- Run patcaus on subset ---
                 res = pc::patcaus::patcaus(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted, 1, 
                     false, na_comp);
             }
