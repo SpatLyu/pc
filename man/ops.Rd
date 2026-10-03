@@ -9,8 +9,8 @@
 \usage{
 \S4method{ops}{data.frame}(
   data,
-  target,
   source,
+  target,
   E = 3:5,
   k = E,
   tau = 1,
@@ -30,8 +30,8 @@
 
 \S4method{ops}{sf}(
   data,
-  target,
   source,
+  target,
   E = 3:5,
   k = E + 1,
   tau = 1,
@@ -52,8 +52,8 @@
 
 \S4method{ops}{SpatRaster}(
   data,
-  target,
   source,
+  target,
   E = 3:5,
   k = E + 1,
   tau = 1,
@@ -74,9 +74,9 @@
 \arguments{
 \item{data}{Observation data.}
 
-\item{target}{Integer of column indice for the target variable.}
-
 \item{source}{Integer of column indice for the source variable.}
+
+\item{target}{Integer of column indice for the target variable.}
 
 \item{E}{(optional) Embedding dimensions.}
 

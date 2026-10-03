@@ -1,4 +1,4 @@
-.ops_ts = \(data, target, source, E = 3:5, k = E, tau = 1, style = 1, lib = NULL, pred = NULL,
+.ops_ts = \(data, source, target, E = 3:5, k = E, tau = 1, style = 1, lib = NULL, pred = NULL,
             maximize = c("dark", "positive", "negative"), dist.metric = c("euclidean", "manhattan", "maximum"), 
             zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(E), higher.parallel = TRUE, h = 0, ...) {
   maximize = match.arg(maximize)
@@ -8,11 +8,11 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance,
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance,
                    dist.metric, relative, weighted, threads, higher.parallel, h, NULL, NULL))
 }
 
-.ops_lattice = \(data, target, source, E = 3:5, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, 
+.ops_lattice = \(data, source, target, E = 3:5, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, 
                  maximize = c("dark", "positive", "negative"), dist.metric = c("euclidean", "manhattan", "maximum"), 
                  zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(E), higher.parallel = TRUE, detrend = FALSE, nb = NULL, ...) {
   if (is.null(nb)) nb = sdsfun::spdep_nb(data)
@@ -23,11 +23,11 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance, 
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance, 
                    dist.metric, relative, weighted, threads, higher.parallel, 0, nb, NULL))
 }
 
-.ops_grid = \(data, target, source, E = 3:5, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL,
+.ops_grid = \(data, source, target, E = 3:5, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL,
               maximize = c("positive", "negative", "dark"), dist.metric = c("euclidean", "manhattan", "maximum"), 
               zero.tolerance = max(k), relative = TRUE, weighted = TRUE, threads = length(E), higher.parallel = TRUE, detrend = FALSE, ...) {
   maximize = match.arg(maximize)
@@ -37,7 +37,7 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance, dist.metric, 
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance, dist.metric, 
                    relative, weighted, threads, higher.parallel, 0, NULL, terra::nrow(data)))
 }
 

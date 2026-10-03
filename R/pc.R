@@ -1,4 +1,4 @@
-.pc_ts = \(data, target, source, libsizes = NULL, E = 3, k = E, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_ts = \(data, source, target, libsizes = NULL, E = 3, k = E, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
            replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k),
            relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, h = 0, ...) {
   dist.metric = match.arg(dist.metric)
@@ -8,15 +8,15 @@
   if (is.null(pred)) pred = lib
 
   if (is.null(libsizes)) {
-    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance,
+    return(RcppPC(sv, tv, lib, pred, E, tau, style, k, zero.tolerance,
                   dist.metric, relative, weighted, threads, h, NULL, NULL))
   } else {
-    return(RcppPCboot(tv, sv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot,
+    return(RcppPCboot(sv, tv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot,
                       replace, seed, relative, weighted, threads, higher.parallel, verbose, h, NULL, NULL))
   }
 }
 
-.pc_lattice = \(data, target, source, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_lattice = \(data, source, target, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
                 replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k), 
                 relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, detrend = FALSE, nb = NULL, ...) {
   if (is.null(nb)) nb = sdsfun::spdep_nb(data)
@@ -27,15 +27,15 @@
   if (is.null(pred)) pred = lib
 
   if (is.null(libsizes)) {
-    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance,
+    return(RcppPC(sv, tv, lib, pred, E, tau, style, k, zero.tolerance,
                   dist.metric, relative, weighted, threads, 0, nb, NULL))
   } else {
-    return(RcppPCboot(tv, sv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot,
+    return(RcppPCboot(sv, tv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot,
                       replace, seed, relative, weighted, threads, higher.parallel, verbose, 0, nb, NULL))
   }
 }
 
-.pc_grid = \(data, target, source, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_grid = \(data, source, target, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
              replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k), 
              relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, detrend = FALSE, ...) {
   dist.metric = match.arg(dist.metric)
@@ -45,10 +45,10 @@
   if (is.null(pred)) pred = lib
 
   if (is.null(libsizes)) {
-    return(RcppPC(tv, sv, lib, pred, E, tau, style, k, zero.tolerance, dist.metric,
+    return(RcppPC(sv, tv, lib, pred, E, tau, style, k, zero.tolerance, dist.metric,
                   relative, weighted, threads, 0, NULL, terra::nrow(data)))
   } else {
-    return(RcppPCboot(tv, sv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot, replace,
+    return(RcppPCboot(sv, tv, libsizes, lib, pred, E, tau, style, k, zero.tolerance, dist.metric, boot, replace,
                       seed, relative, weighted, threads, higher.parallel, verbose, 0, NULL, terra::nrow(data)))
   }
 }

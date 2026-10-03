@@ -9,8 +9,8 @@
 \usage{
 \S4method{pc}{data.frame}(
   data,
-  target,
   source,
+  target,
   libsizes = NULL,
   E = 3,
   k = E,
@@ -34,8 +34,8 @@
 
 \S4method{pc}{sf}(
   data,
-  target,
   source,
+  target,
   libsizes = NULL,
   E = 3,
   k = E + 1,
@@ -60,8 +60,8 @@
 
 \S4method{pc}{SpatRaster}(
   data,
-  target,
   source,
+  target,
   libsizes = NULL,
   E = 3,
   k = E + 1,
@@ -86,9 +86,9 @@
 \arguments{
 \item{data}{Observation data.}
 
-\item{target}{Integer of column indice for the target variable.}
-
 \item{source}{Integer of column indice for the source variable.}
+
+\item{target}{Integer of column indice for the target variable.}
 
 \item{libsizes}{(optional) Number of observations used.}
 
