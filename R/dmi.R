@@ -6,6 +6,8 @@
 }
 
 #' Delayed Mutual Information
+#' 
+#' @note `dmi` is only supported for time-series inputs.
 #'
 #' @inheritParams fnn
 #' @param base (optional) Logarithm base of the entropy.
