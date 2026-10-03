@@ -49,7 +49,7 @@
 #' @return A list.
 #' \describe{
 #'   \item{\code{param}}{The selected optimal parameter combination.}
-#'   \item{\code{xmap}}{A data.frame containing cross-mapping performance across parameter settings.}
+#'   \item{\code{causality}}{A data.frame containing results across parameter settings.}
 #' }
 #'
 #' @export
@@ -58,7 +58,7 @@
 #'
 #' @examples
 #' crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
-#' pc::ops(crash, 1, 2, E = 3:10, maximize = "positive", threads = 1)
+#' pc::ops(crash, 2, 1, E = 3:10, maximize = "positive", threads = 1)
 #'
 methods::setMethod("ops", "data.frame", .ops_ts)
 
