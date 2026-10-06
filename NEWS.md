@@ -8,6 +8,10 @@
 
 * Clarify output indexing and boundary handling in `fnn` generic (#69).
 
+### breaking changes
+
+* Euclidean/Manhattan distances now automatically compensate for dimensions skipped due to `NA/NaN`, aligned with base R `dist()` function (#79).
+
 # pc 0.2
 
 ### new
