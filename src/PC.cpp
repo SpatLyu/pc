@@ -890,7 +890,8 @@ Rcpp::List RcppPCops(
     int parallel_level = 0,
     int h = 0,
     Rcpp::Nullable<Rcpp::List> nb = R_NilValue,
-    Rcpp::Nullable<int> nrows = R_NilValue)
+    Rcpp::Nullable<int> nrows = R_NilValue,
+    bool na_comp = true)
 {
     // Input Conversion and Validation --------------------------------------
     std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
@@ -1116,7 +1117,8 @@ Rcpp::List RcppPCops(
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), false);
+                    static_cast<size_t>(std::abs(threads)), 
+                    false, na_comp);
             }
             else
             {
@@ -1139,7 +1141,8 @@ Rcpp::List RcppPCops(
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
-                    static_cast<size_t>(std::abs(threads)), false);
+                    static_cast<size_t>(std::abs(threads)), 
+                    false, na_comp);
             }
 
             result[i][0] = Ei;
@@ -1198,7 +1201,8 @@ Rcpp::List RcppPCops(
                     Mx, My, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
-                    dist_metric, relative, weighted, 1, false);
+                    dist_metric, relative, weighted, 1, 
+                    false, na_comp);
             }
             else
             {
@@ -1220,7 +1224,8 @@ Rcpp::List RcppPCops(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
                     static_cast<size_t>(std::abs(h)),
-                    dist_metric, relative, weighted, 1, false);
+                    dist_metric, relative, weighted, 1, 
+                    false, na_comp);
             }
 
             result[i][0] = Ei;
