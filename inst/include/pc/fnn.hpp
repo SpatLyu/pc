@@ -91,6 +91,7 @@ namespace fnn
      *      Rtol        : Relative distance threshold
      *      Atol        : Absolute distance threshold
      *      threads     : Number of threads for parallel computation
+     *      na_comp     : Adjust distance for missing values (TRUE/FALSE)
      *
      *  Returns:
      *      Proportion of false nearest neighbors (double)
@@ -297,6 +298,7 @@ namespace fnn
      * - parallel_level: Parallelization strategy
      *                        0 = prediction point-level parallelism
      *                        1 = embedding dimension-level parallelism
+     * - na_comp: Adjust distance for missing values (TRUE/FALSE)
      *
      * Returns:
      * - A vector of FNN ratios corresponding to each E1 from 1 to D - 1.
