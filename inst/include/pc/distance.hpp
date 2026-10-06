@@ -73,7 +73,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace pc 
+namespace pc
 {
 
 namespace distance
