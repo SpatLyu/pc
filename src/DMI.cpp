@@ -16,6 +16,7 @@ Rcpp::NumericVector RcppDMI(
     int k = 3,
     int alg = 0,
     double base = 2.0,
+    bool na_comp = true,
     bool normalize = false,
     int threads = 1)
 {
@@ -68,7 +69,7 @@ Rcpp::NumericVector RcppDMI(
             tg, tau_std, pred_std, 
             static_cast<size_t>(std::abs(k)), 
             static_cast<size_t>(std::abs(alg)), 
-            base, normalize,
+            base, na_comp, normalize,
             static_cast<size_t>(std::abs(threads)));
 
     // Convert the result back to Rcpp::NumericVector and set names as "tau:1", "tau:2", ..., "tau:n"
