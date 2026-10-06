@@ -106,7 +106,8 @@ namespace fnn
         size_t k = 3,
         double Rtol = 10.0,
         double Atol = 2.0,
-        size_t threads = 1) 
+        size_t threads = 1,
+        bool na_comp = true) 
     {
         if (embedding.empty() || embedding[0].size() < E2) 
         {
@@ -133,7 +134,7 @@ namespace fnn
             //     // Compute distance using only the first E1 dimensions
             //     std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
             //     std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
-            //     double dist = pc::distance::distance(xi, xj, dist_metric, true); 
+            //     double dist = pc::distance::distance(xi, xj, dist_metric, true, na_comp); 
 
             //     if (dist < min_dist) 
             //     {
@@ -173,7 +174,7 @@ namespace fnn
                 std::vector<double> xi(embedding[pidx].begin(), embedding[pidx].begin() + E1);
                 std::vector<double> xj(embedding[lidx].begin(), embedding[lidx].begin() + E1);
 
-                double dist = pc::distance::distance(xi, xj, dist_metric, true);
+                double dist = pc::distance::distance(xi, xj, dist_metric, true, na_comp);
                 if (!std::isnan(dist)) dists.emplace_back(dist, lidx);
             }
 
