@@ -313,7 +313,8 @@ namespace fnn
         const std::string& dist_metric = "euclidean",
         size_t k = 3,
         size_t threads = 1,
-        size_t parallel_level = 0) 
+        size_t parallel_level = 0,
+        bool na_comp = true) 
     {
         // Configure threads
         threads = std::min(static_cast<size_t>(std::thread::hardware_concurrency()), threads);
@@ -333,7 +334,7 @@ namespace fnn
             {
                 size_t E2 = E1 + 1;
                 double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                             k, Rtol[E1 - 1], Atol[E1 - 1], threads);
+                                             k, Rtol[E1 - 1], Atol[E1 - 1], threads, na_comp);
                 results[E1 - 1] = fnn_ratio;
             }
         } 
@@ -342,7 +343,7 @@ namespace fnn
             RcppThread::parallelFor(1, max_E2, [&](size_t E1) {
                 size_t E2 = E1 + 1;
                 double fnn_ratio = singlefnn(embedding, lib, pred, E1, E2, dist_metric,
-                                             k, Rtol[E1 - 1], Atol[E1 - 1], 1);
+                                             k, Rtol[E1 - 1], Atol[E1 - 1], 1, na_comp);
                 results[E1 - 1] = fnn_ratio;
             }, threads);
         }
