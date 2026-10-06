@@ -193,8 +193,8 @@ namespace patcaus
      *      parallel_level  : Parallelization strategy
      *                        0 = projection-level parallelism
      *                        1 = bootstrap-level parallelism
-     *      na_comp         : Adjust distance for missing values (TRUE/FALSE)
      *      verbose         : Show progress bar
+     *      na_comp         : Adjust distance for missing values (TRUE/FALSE)
      *
      *  Returns:
      *      3D array [3 × libsizes × boot]:
@@ -233,8 +233,8 @@ namespace patcaus
         bool weighted = true,
         size_t threads = 1,
         size_t parallel_level = 0,
-        bool na_comp = true,
-        bool verbose = false)
+        bool verbose = false,
+        bool na_comp = true)
     {
     // --------------------------------------------------------------------------
     // Step 1: Configure threads and random generators

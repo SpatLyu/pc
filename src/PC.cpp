@@ -561,7 +561,7 @@ Rcpp::List RcppPCboot(
             static_cast<size_t>(std::abs(boot)), replace_sampling, 
             static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
-            static_cast<size_t>(std::abs(parallel_level)), na_comp, verbose);
+            static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }
     else
     {   
@@ -609,7 +609,7 @@ Rcpp::List RcppPCboot(
             static_cast<size_t>(std::abs(boot)), replace_sampling, 
             static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
-            static_cast<size_t>(std::abs(parallel_level)), na_comp, verbose);
+            static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }    
 
     // --- Result Processing -----------------------------------------------------
