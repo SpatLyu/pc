@@ -143,14 +143,15 @@ namespace ksginfo
         const std::vector<size_t>& vars,
         size_t k = 3,
         size_t alg = 0,
-        double base = 2.0)
+        double base = 2.0,
+        bool na_comp = true)
     {
         Matrix sub = subset(mat,vars);
 
         const size_t d = sub.size();
         const size_t n = sub[0].size();
 
-        auto dist = pc::distance::distance(sub,"maximum",true,false);
+        auto dist = pc::distance::distance(sub,"maximum",true,na_comp,false);
 
         double avg = 0.0;
 
@@ -205,12 +206,13 @@ namespace ksginfo
         const std::vector<size_t>& cond,
         size_t k = 3,
         size_t alg = 0,
-        double base = 2.0)
+        double base = 2.0,
+        bool na_comp = true)
     {
         std::vector<size_t> tc = cond;
         tc.insert(tc.end(),target.begin(),target.end());
 
-        return je(mat,tc,k,alg,base) - je(mat,cond,k,alg,base);
+        return je(mat,tc,k,alg,base,na_comp) - je(mat,cond,k,alg,base,na_comp);
     }
 
     /***********************************************************
@@ -223,14 +225,15 @@ namespace ksginfo
         size_t k = 3,
         size_t alg = 0,
         double base = 2.0,
+        bool na_comp = true,
         bool normalize = false)
     {
         std::vector<size_t> xy = target;
         xy.insert(xy.end(), interact.begin(), interact.end());
 
-        auto d_xy = pc::distance::distance(subset(mat,xy),"maximum",true,false);
-        auto d_x  = pc::distance::distance(subset(mat,target),"maximum",true,false);
-        auto d_y  = pc::distance::distance(subset(mat,interact),"maximum",true,false);
+        auto d_xy = pc::distance::distance(subset(mat,xy),"maximum",true,na_comp,false);
+        auto d_x  = pc::distance::distance(subset(mat,target),"maximum",true,na_comp,false);
+        auto d_y  = pc::distance::distance(subset(mat,interact),"maximum",true,na_comp,false);
 
         const size_t n = d_xy.size();
         const size_t d = xy.size();
@@ -331,6 +334,7 @@ namespace ksginfo
         size_t k = 3,
         size_t alg = 0,
         double base = 2.0,
+        bool na_comp = true,
         bool normalize = false)
     {
         std::vector<size_t> xyz = conds;
@@ -346,10 +350,10 @@ namespace ksginfo
         std::vector<size_t> yz = conds;
         yz.insert(yz.end(), interact.begin(), interact.end());
 
-        auto d_xyz = pc::distance::distance(subset(mat,xyz),"maximum",true,false);
-        auto d_xz  = pc::distance::distance(subset(mat,xz),"maximum",true,false);
-        auto d_yz  = pc::distance::distance(subset(mat,yz),"maximum",true,false);
-        auto d_z   = pc::distance::distance(subset(mat,conds),"maximum",true,false);
+        auto d_xyz = pc::distance::distance(subset(mat,xyz),"maximum",true,na_comp,false);
+        auto d_xz  = pc::distance::distance(subset(mat,xz),"maximum",true,na_comp,false);
+        auto d_yz  = pc::distance::distance(subset(mat,yz),"maximum",true,na_comp,false);
+        auto d_z   = pc::distance::distance(subset(mat,conds),"maximum",true,na_comp,false);
 
         const size_t n = d_xyz.size();
         const size_t d = xy.size();
