@@ -192,6 +192,7 @@ Rcpp::List RcppPC(
                 "Embedding matrices are empty after applying the "
                 "prediction horizon."
             );
+        }
 
         // Remove indices before the valid embedding range and
         // shift the remaining indices after removing max_lag rows.
@@ -220,14 +221,12 @@ Rcpp::List RcppPC(
         }
 
         // Remove indices that are outside the processed embedding matrices.
-        // After applying h, Mx and My have the same number of observations.
-        const size_t n_valid = std::min(Mx.size(), My.size());
 
         lib_std.erase(
             std::remove_if(
                 lib_std.begin(), lib_std.end(),
                 [&](size_t idx) {
-                    return idx >= n_valid;
+                    return idx >= Mx.size();
                 }),
             lib_std.end());
 
@@ -235,7 +234,7 @@ Rcpp::List RcppPC(
             std::remove_if(
                 pred_std.begin(), pred_std.end(),
                 [&](size_t idx) {
-                    return idx >= n_valid;
+                    return idx >= Mx.size();
                 }),
             pred_std.end());
 
