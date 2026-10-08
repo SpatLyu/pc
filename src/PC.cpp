@@ -1424,7 +1424,6 @@ Rcpp::List RcppPCops(
             {   
                 Mx = pc::embed::embed(
                     sm, Ei, taui, static_cast<size_t>(std::abs(style)));
-
                 My = pc::embed::embed(
                     tm, Ei, taui, static_cast<size_t>(std::abs(style)));
             }
@@ -1460,7 +1459,12 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    My_sub.push_back(My[idx]);
+                    if (nb.isNotNULL() || nrows.isNotNull() || h_abs = 0) 
+                    {
+                        My_sub.push_back(My[idx]);
+                    } else {
+                        My_sub.push_back(My[idx + h_abs]);
+                    }
                 }
 
                 // --- Run patcaus on subset ---
