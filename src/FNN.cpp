@@ -131,9 +131,17 @@ Rcpp::NumericVector RcppFNN(
             static_cast<size_t>(std::abs(tau)), 
             static_cast<size_t>(std::abs(style)));
 
-        size_t max_lag = (tau == 0) 
-            ? (max_E - 1)
-            : ((max_E - 1) * static_cast<size_t>(std::abs(tau)));
+        size_t max_lag;
+        if (tau == 0) {
+            // embed(): lag = 0, 1, ..., E - 1
+            max_lag = max_E - 1;
+        } else if (style == 0) {
+            // embed(): lag = 0, tau, ..., (E - 1) * tau
+            max_lag = (max_E - 1) * static_cast<size_t>(std::abs(tau));
+        } else {
+            // embed(): lag = tau, 2 * tau, ..., E * tau
+            max_lag = max_E * static_cast<size_t>(std::abs(tau));
+        }        
 
         lib_std.erase(
             std::remove_if(lib_std.begin(), lib_std.end(), 
