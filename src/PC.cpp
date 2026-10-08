@@ -175,7 +175,6 @@ Rcpp::List RcppPC(
         size_t h_abs = static_cast<size_t>(std::abs(h));
 
         if (h_abs > 0) {
-
             if (h_abs >= n_obs - 1 - max_lag -
                 static_cast<size_t>(std::abs(num_neighbors))) {
                 Rcpp::stop(
@@ -183,24 +182,7 @@ Rcpp::List RcppPC(
                     "observations after embedding."
                 );
             }
-
-            // Mx(t) is matched with My(t + h).
-            // Remove the last h observations from Mx.
-            if (h_abs >= Mx.size()) {
-                Rcpp::stop(
-                    "Prediction horizon h is too large for Mx."
-                );
-            }
-
             Mx.erase(Mx.end() - h_abs, Mx.end());
-
-            // Remove the first h observations from My.
-            if (h_abs >= My.size()) {
-                Rcpp::stop(
-                    "Prediction horizon h is too large for My."
-                );
-            }
-
             My.erase(My.begin(), My.begin() + h_abs);
         }
 
