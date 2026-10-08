@@ -1208,30 +1208,27 @@ Rcpp::List RcppPCops(
                     pred_std.end()
         );
 
-        if (h_abs > 0) {
+        if (h_abs > 0) 
+        {
+            // Remove indices that corresponding to time shift (the h).
+            const size_t n_valid = n_obs - h_abs;
 
+            lib_std.erase(
+                std::remove_if(
+                    lib_std.begin(), lib_std.end(),
+                    [&](size_t idx) {
+                        return idx >= n_valid;
+                    }),
+                lib_std.end());
 
-
-            // Mx(t) is matched with My(t + h).
-            // Remove the last h observations from Mx.
-            if (h_abs >= Mx.size()) {
-                Rcpp::stop(
-                    "Prediction horizon h is too large for Mx."
-                );
-            }
-
-            Mx.erase(Mx.end() - h_abs, Mx.end());
-
-            // Remove the first h observations from My.
-            if (h_abs >= My.size()) {
-                Rcpp::stop(
-                    "Prediction horizon h is too large for My."
-                );
-            }
-
-            My.erase(My.begin(), My.begin() + h_abs);
+            pred_std.erase(
+                std::remove_if(
+                    pred_std.begin(), pred_std.end(),
+                    [&](size_t idx) {
+                        return idx >= n_valid;
+                    }),
+                pred_std.end());
         }
-
     }
 
     // ---- sort + unique lib/pred ----
