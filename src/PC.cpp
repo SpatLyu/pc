@@ -1152,10 +1152,27 @@ Rcpp::List RcppPCops(
         }
     }
 
+    // Compute the maximum embedding lag for time series
+    size_t max_E = *std::max_element(Es.begin(), Es.end());
+    size_t max_tau = *std::max_element(taus.begin(), taus.end());
+
+    size_t max_lag;
+    if (max_tau == 0) {
+        // embed(): lag = 0, 1, ..., E - 1
+        max_lag = max_E - 1;
+    } else if (static_cast<size_t>(std::abs(style)) == 0) {
+        // embed(): lag = 0, tau, ..., (E - 1) * tau
+        max_lag = (max_E - 1) * max_tau;
+    } else {
+        // embed(): lag = tau, 2 * tau, ..., E * tau
+        max_lag = max_E * max_tau;
+    }
+    
     // Process necessay data
     std::vector<std::vector<size_t>> nb_std;
     std::vector<std::vector<double>> tm;
     std::vector<std::vector<double>> sm;
+
     if (nb.isNotNull()) 
     {   
         // Convert Rcpp::List to std::vector<std::vector<size_t>>
@@ -1169,22 +1186,6 @@ Rcpp::List RcppPCops(
     }
     else  
     {
-        size_t max_E = *std::max_element(Es.begin(), Es.end());
-        size_t max_tau = *std::max_element(taus.begin(), taus.end());
-
-        size_t max_lag;
-
-        if (max_tau == 0) {
-            // embed(): lag = 0, 1, ..., E - 1
-            max_lag = max_E - 1;
-        } else if (static_cast<size_t>(std::abs(style)) == 0) {
-            // embed(): lag = 0, tau, ..., (E - 1) * tau
-            max_lag = (max_E - 1) * max_tau;
-        } else {
-            // embed(): lag = tau, 2 * tau, ..., E * tau
-            max_lag = max_E * max_tau;
-        }
-
         lib_std.erase(
             std::remove_if(lib_std.begin(), lib_std.end(), 
                 [&](size_t idx){ return idx < max_lag; }),
