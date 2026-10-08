@@ -1169,15 +1169,8 @@ Rcpp::List RcppPCops(
     }
     else  
     {
-        Mx = pc::embed(
-            sg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
-
-        My = pc::embed(
-            tg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
-
-        // Compute the maximum embedding lag according to embed().
-        size_t max_E = *std::max_element(E_std.begin(), E_std.end());
-        size_t max_tau = *std::max_element(tau_std.begin(), tau_std.end());
+        size_t max_E = *std::max_element(Es.begin(), Es.end());
+        size_t max_tau = *std::max_element(taus.begin(), taus.end());
 
         size_t max_lag;
 
@@ -1192,103 +1185,17 @@ Rcpp::List RcppPCops(
             max_lag = max_E * max_tau;
         }
 
-        // Remove the first max_lag rows containing NA values.
-        if (max_lag > 0) {
-            if (Mx.size() > max_lag) {
-                Mx.erase(Mx.begin(), Mx.begin() + max_lag);
-            } else {
-                Mx.clear();
-            }
-
-            if (My.size() > max_lag) {
-                My.erase(My.begin(), My.begin() + max_lag);
-            } else {
-                My.clear();
-            }
-        }
-
-        // Check whether the embedding matrices remain valid.
-        if (Mx.empty() || My.empty()) {
-            Rcpp::stop(
-                "Embedding matrices are empty after removing the initial "
-                "invalid observations."
-            );
-        }
-
-        // Apply prediction horizon h.
-        size_t h_abs = static_cast<size_t>(std::abs(h));
-
-        if (h_abs > 0) {
-            if (h_abs >= n_obs - 1 - max_lag -
-                static_cast<size_t>(std::abs(num_neighbors))) {
-                Rcpp::stop(
-                    "Prediction horizon h is too large for the available "
-                    "observations after embedding."
-                );
-            }
-            Mx.erase(Mx.end() - h_abs, Mx.end());
-            My.erase(My.begin(), My.begin() + h_abs);
-        }
-
-        // Check again after applying the prediction horizon.
-        if (Mx.empty() || My.empty()) {
-            Rcpp::stop(
-                "Embedding matrices are empty after applying the "
-                "prediction horizon."
-            );
-        }
-
-        // Remove indices before the valid embedding range and
-        // shift the remaining indices after removing max_lag rows.
         lib_std.erase(
-            std::remove_if(
-                lib_std.begin(), lib_std.end(),
-                [&](size_t idx) {
-                    return idx < max_lag;
-                }),
-            lib_std.end());
-
-        for (size_t& idx : lib_std) {
-            idx -= max_lag;
-        }
+            std::remove_if(lib_std.begin(), lib_std.end(), 
+                [&](size_t idx){ return idx < max_lag; }),
+                lib_std.end()
+        );
 
         pred_std.erase(
-            std::remove_if(
-                pred_std.begin(), pred_std.end(),
-                [&](size_t idx) {
-                    return idx < max_lag;
-                }),
-            pred_std.end());
-
-        for (size_t& idx : pred_std) {
-            idx -= max_lag;
-        }
-
-        // Remove indices that are outside the processed embedding matrices.
-
-        lib_std.erase(
-            std::remove_if(
-                lib_std.begin(), lib_std.end(),
-                [&](size_t idx) {
-                    return idx >= Mx.size();
-                }),
-            lib_std.end());
-
-        pred_std.erase(
-            std::remove_if(
-                pred_std.begin(), pred_std.end(),
-                [&](size_t idx) {
-                    return idx >= Mx.size();
-                }),
-            pred_std.end());
-
-        // Ensure that valid library and prediction indices remain.
-        if (lib_std.empty() || pred_std.empty()) {
-            Rcpp::stop(
-                "No valid library or prediction indices remain after "
-                "embedding and applying the prediction horizon."
-            );
-        }
+            std::remove_if(pred_std.begin(), pred_std.end(), 
+                [&](size_t idx){ return idx < max_lag; }),
+                    pred_std.end()
+        );
     }
 
     // ---- sort + unique lib/pred ----
