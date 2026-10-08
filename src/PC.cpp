@@ -125,10 +125,10 @@ Rcpp::List RcppPC(
     }
     else  
     {
-        Mx = pc::embed(
+        Mx = pc::embed::embed(
             sg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
 
-        My = pc::embed(
+        My = pc::embed::embed(
             tg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
 
         // Compute the maximum embedding lag according to embed().
@@ -552,10 +552,10 @@ Rcpp::List RcppPCboot(
     }
     else  
     {
-        Mx = pc::embed(
+        Mx = pc::embed::embed(
             sg, E_std[0], tau_std[0], static_cast<size_t>(std::abs(style)));
 
-        My = pc::embed(
+        My = pc::embed::embed(
             tg, E_std[1], tau_std[1], static_cast<size_t>(std::abs(style)));
 
         // Compute the maximum embedding lag according to embed().
@@ -1171,7 +1171,7 @@ Rcpp::List RcppPCops(
     // Prepare prediction horizon h.
     size_t h_abs = static_cast<size_t>(std::abs(h));
     size_t max_k = *std::max_element(ks.begin(), ks.end());
-    if (h_abs >= n_obs - 1 - max_lag - ks) {
+    if (h_abs >= n_obs - 1 - max_lag - max_k) {
         Rcpp::stop(
             "Prediction horizon h is too large for the available "
             "observations after embedding."
@@ -1459,7 +1459,7 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    if (nb.isNotNULL() || nrows.isNotNull() || h_abs = 0) 
+                    if (nb.isNotNull() || nrows.isNotNull() || h_abs = 0) 
                     {
                         My_sub.push_back(My[idx]);
                     } else {
