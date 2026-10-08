@@ -145,13 +145,13 @@ Rcpp::NumericVector RcppFNN(
 
         lib_std.erase(
             std::remove_if(lib_std.begin(), lib_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
+                [&](size_t idx){ return idx < max_lag; }),
             lib_std.end()
         );
 
         pred_std.erase(
             std::remove_if(pred_std.begin(), pred_std.end(), 
-                [&](size_t idx){ return idx + 1 < max_lag; }),
+                [&](size_t idx){ return idx < max_lag; }),
             pred_std.end()
         );
     }

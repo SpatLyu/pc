@@ -1167,7 +1167,17 @@ Rcpp::List RcppPCops(
         // embed(): lag = tau, 2 * tau, ..., E * tau
         max_lag = max_E * max_tau;
     }
-    
+
+    // Prepare prediction horizon h.
+    size_t h_abs = static_cast<size_t>(std::abs(h));
+    size_t max_k = *std::max_element(ks.begin(), ks.end());
+    if (h_abs >= n_obs - 1 - max_lag - ks) {
+        Rcpp::stop(
+            "Prediction horizon h is too large for the available "
+            "observations after embedding."
+        );
+    }
+
     // Process necessay data
     std::vector<std::vector<size_t>> nb_std;
     std::vector<std::vector<double>> tm;
@@ -1197,6 +1207,31 @@ Rcpp::List RcppPCops(
                 [&](size_t idx){ return idx < max_lag; }),
                     pred_std.end()
         );
+
+        if (h_abs > 0) {
+
+
+
+            // Mx(t) is matched with My(t + h).
+            // Remove the last h observations from Mx.
+            if (h_abs >= Mx.size()) {
+                Rcpp::stop(
+                    "Prediction horizon h is too large for Mx."
+                );
+            }
+
+            Mx.erase(Mx.end() - h_abs, Mx.end());
+
+            // Remove the first h observations from My.
+            if (h_abs >= My.size()) {
+                Rcpp::stop(
+                    "Prediction horizon h is too large for My."
+                );
+            }
+
+            My.erase(My.begin(), My.begin() + h_abs);
+        }
+
     }
 
     // ---- sort + unique lib/pred ----
@@ -1311,6 +1346,38 @@ Rcpp::List RcppPCops(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
                 My = pc::embed::embed(
                     tg, Ei, taui, static_cast<size_t>(std::abs(style)));
+
+                
+
+                if (h_abs > 0) {
+
+                    if (h_abs >= n_obs - 1 - max_lag -
+                        static_cast<size_t>(std::abs(num_neighbors))) {
+                        Rcpp::stop(
+                            "Prediction horizon h is too large for the available "
+                            "observations after embedding."
+                        );
+                    }
+
+                    // Mx(t) is matched with My(t + h).
+                    // Remove the last h observations from Mx.
+                    if (h_abs >= Mx.size()) {
+                        Rcpp::stop(
+                            "Prediction horizon h is too large for Mx."
+                        );
+                    }
+
+                    Mx.erase(Mx.end() - h_abs, Mx.end());
+
+                    // Remove the first h observations from My.
+                    if (h_abs >= My.size()) {
+                        Rcpp::stop(
+                            "Prediction horizon h is too large for My."
+                        );
+                    }
+
+                    My.erase(My.begin(), My.begin() + h_abs);
+                }                    
             }
 
             // --- Perform Pattern Causality Analysis ---
