@@ -1371,7 +1371,7 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    if (nb.isNotNULL() || nrows.isNotNull() || h_abs = 0) 
+                    if (nb.isNotNull() || nrows.isNotNull() || h_abs == 0) 
                     {
                         My_sub.push_back(My[idx]);
                     } else {
@@ -1459,7 +1459,7 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    if (nb.isNotNull() || nrows.isNotNull() || h_abs = 0) 
+                    if (nb.isNotNull() || nrows.isNotNull() || h_abs == 0) 
                     {
                         My_sub.push_back(My[idx]);
                     } else {
