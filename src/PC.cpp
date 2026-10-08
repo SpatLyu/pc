@@ -140,7 +140,7 @@ Rcpp::List RcppPC(
         if (max_tau == 0) {
             // embed(): lag = 0, 1, ..., E - 1
             max_lag = max_E - 1;
-        } else if (static_cast<size_t>(std::abs(style)) == 0) {
+        } else if (style == 0) {
             // embed(): lag = 0, tau, ..., (E - 1) * tau
             max_lag = (max_E - 1) * max_tau;
         } else {
@@ -567,7 +567,7 @@ Rcpp::List RcppPCboot(
         if (max_tau == 0) {
             // embed(): lag = 0, 1, ..., E - 1
             max_lag = max_E - 1;
-        } else if (static_cast<size_t>(std::abs(style)) == 0) {
+        } else if (style == 0) {
             // embed(): lag = 0, tau, ..., (E - 1) * tau
             max_lag = (max_E - 1) * max_tau;
         } else {
@@ -1160,7 +1160,7 @@ Rcpp::List RcppPCops(
     if (max_tau == 0) {
         // embed(): lag = 0, 1, ..., E - 1
         max_lag = max_E - 1;
-    } else if (static_cast<size_t>(std::abs(style)) == 0) {
+    } else if (style == 0) {
         // embed(): lag = 0, tau, ..., (E - 1) * tau
         max_lag = (max_E - 1) * max_tau;
     } else {
