@@ -1342,39 +1342,7 @@ Rcpp::List RcppPCops(
                 Mx = pc::embed::embed(
                     sg, Ei, taui, static_cast<size_t>(std::abs(style)));
                 My = pc::embed::embed(
-                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));
-
-                
-
-                if (h_abs > 0) {
-
-                    if (h_abs >= n_obs - 1 - max_lag -
-                        static_cast<size_t>(std::abs(num_neighbors))) {
-                        Rcpp::stop(
-                            "Prediction horizon h is too large for the available "
-                            "observations after embedding."
-                        );
-                    }
-
-                    // Mx(t) is matched with My(t + h).
-                    // Remove the last h observations from Mx.
-                    if (h_abs >= Mx.size()) {
-                        Rcpp::stop(
-                            "Prediction horizon h is too large for Mx."
-                        );
-                    }
-
-                    Mx.erase(Mx.end() - h_abs, Mx.end());
-
-                    // Remove the first h observations from My.
-                    if (h_abs >= My.size()) {
-                        Rcpp::stop(
-                            "Prediction horizon h is too large for My."
-                        );
-                    }
-
-                    My.erase(My.begin(), My.begin() + h_abs);
-                }                    
+                    tg, Ei, taui, static_cast<size_t>(std::abs(style)));                
             }
 
             // --- Perform Pattern Causality Analysis ---
@@ -1403,7 +1371,12 @@ Rcpp::List RcppPCops(
                 {
                     size_t idx = selected_indices[i];
                     Mx_sub.push_back(Mx[idx]);
-                    My_sub.push_back(My[idx]);
+                    if (nb.isNotNULL() || nrows.isNotNull() || h_abs = 0) 
+                    {
+                        My_sub.push_back(My[idx]);
+                    } else {
+                        My_sub.push_back(My[idx + h_abs]);
+                    }
                 }
 
                 // --- Run patcaus on subset ---
