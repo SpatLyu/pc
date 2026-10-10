@@ -4,14 +4,12 @@
  * Nonparametric time-delay projection using weighted nearest neighbors.
  *
  * Provides functionality for:
- *   - Predicting future signature vectors in a reconstructed space.
+ *   - Predicting signature vectors in a reconstructed space.
  *   - Performing local neighbor-based forecasting with distance weighting.
- *   - Supporting time-delay prediction via a configurable horizon (h).
  *
  * The method:
  *   - Selects nearest neighbors based on a distance matrix.
  *   - Applies exponential weighting to emphasize closer neighbors.
- *   - Projects neighbor states forward in time (t + h).
  *   - Computes robust weighted averages with NaN handling and zero filtering.
  *
  * Designed for:
@@ -67,9 +65,6 @@ namespace projection
      * @param num_neighbors  Number of nearest neighbors to use. If == 0, defaults to E+1.
      * @param zero_tolerance Maximum allowed zero values per dimension before forcing prediction to zero.
      *                       If == 0, defaults to E−1.
-     * @param h              Prediction horizon (time shift). Defines how far ahead in time the prediction is performed.
-     *                       For each base index p, nearest neighbors are identified at time p, and their future states 
-     *                       at time (lib_row + h) are used to predict the target state at time (p + h).
      * @param threads        Number of threads to use. If <= 1, runs serially; otherwise runs parallel.
      *
      * @return A matrix of predicted signature vectors, sized SMy.size() × (E−1).
@@ -80,8 +75,7 @@ namespace projection
         const std::vector<size_t>& lib_indices,
         const std::vector<size_t>& pred_indices,
         size_t num_neighbors = 0,  
-        size_t zero_tolerance = 0,  
-        size_t h = 0,
+        size_t zero_tolerance = 0,
         size_t threads = 1
     ) {
       const size_t n_obs = SMy.size();
@@ -154,53 +148,26 @@ namespace projection
           }
         }
 
-        if (h == 0) { // no projection horizon
-          double total_weight = std::accumulate(weights.begin(), weights.end(), 0.0);
+        double total_weight = std::accumulate(weights.begin(), weights.end(), 0.0);
 
-          for (size_t dim = 0; dim < n_sig_dim; ++dim) {
-            size_t zero_count = 0;
-            double weighted_sum = 0.0;
-            bool has_valid = false;
+        for (size_t dim = 0; dim < n_sig_dim; ++dim) {
+          size_t zero_count = 0;
+          double weighted_sum = 0.0;
+          bool has_valid = false;
 
-            for (size_t i = 0; i < k; ++i) {
-              size_t lib_row = valid_libs[neighbor_indices[i]];
-              double val = SMy[lib_row][dim]; 
-              if (std::isnan(val)) continue;
-              if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
-              weighted_sum += val * weights[i];
-              has_valid = true;
-            }
-
-            if (zero_count > zero_tolerance) {
-              pred_signatures[p][dim] = 0.0;
-            } else if (has_valid && total_weight > 0.0) {
-              pred_signatures[p][dim] = weighted_sum / total_weight;
-            }
+          for (size_t i = 0; i < k; ++i) {
+            size_t lib_row = valid_libs[neighbor_indices[i]];
+            double val = SMy[lib_row][dim]; 
+            if (std::isnan(val)) continue;
+            if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
+            weighted_sum += val * weights[i];
+            has_valid = true;
           }
-        } else {
-          for (size_t dim = 0; dim < n_sig_dim; ++dim) {
-            size_t zero_count = 0;
-            double weighted_sum = 0.0;
-            double used_weight = 0.0;
-            bool has_valid = false;
 
-            for (size_t i = 0; i < k; ++i) {
-              size_t lib_row = valid_libs[neighbor_indices[i]];
-              size_t target_row = lib_row + h;
-              if (target_row >= n_obs) continue;
-              double val = SMy[target_row][dim];
-              if (std::isnan(val)) continue;
-              if (pc::numericutils::doubleNearlyEqual(val,0.0)) zero_count++;
-              weighted_sum += val * weights[i];
-              used_weight += weights[i];
-              has_valid = true;
-            }
-
-            if (zero_count > zero_tolerance) {
-              pred_signatures[p + h][dim] = 0.0;
-            } else if (has_valid && used_weight > 0.0) {
-              pred_signatures[p + h][dim] = weighted_sum / used_weight;
-            }
+          if (zero_count > zero_tolerance) {
+            pred_signatures[p][dim] = 0.0;
+          } else if (has_valid && total_weight > 0.0) {
+            pred_signatures[p][dim] = weighted_sum / total_weight;
           }
         }
       };
