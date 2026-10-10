@@ -221,7 +221,6 @@ namespace patcaus
         const std::vector<size_t>& pred_indices,
         const size_t& num_neighbors = 0,
         const size_t& zero_tolerance = 0,
-        const size_t& h = 0,
         const std::string& dist_metric = "euclidean",
         size_t boot = 99,
         bool replace_sampling = true,

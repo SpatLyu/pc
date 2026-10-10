@@ -311,7 +311,6 @@ Rcpp::List RcppPC(
             Mx, My, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
             static_cast<size_t>(std::abs(threads)), 
             true, na_comp);
@@ -358,7 +357,6 @@ Rcpp::List RcppPC(
             Mx_sub, My_sub, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)),
             dist_metric, relative, weighted,
             static_cast<size_t>(std::abs(threads)), 
             true, na_comp);
@@ -753,9 +751,8 @@ Rcpp::List RcppPCboot(
             Mx, My, valid_libsizes, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)), dist_metric, 
-            static_cast<size_t>(std::abs(boot)), replace_sampling, 
-            static_cast<unsigned long long>(std::abs(seed)),
+            dist_metric, static_cast<size_t>(std::abs(boot)), 
+            replace_sampling, static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
             static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }
@@ -801,9 +798,8 @@ Rcpp::List RcppPCboot(
             Mx_sub, My_sub, valid_libsizes, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            static_cast<size_t>(std::abs(h)), dist_metric, 
-            static_cast<size_t>(std::abs(boot)), replace_sampling, 
-            static_cast<unsigned long long>(std::abs(seed)),
+            dist_metric, tatic_cast<size_t>(std::abs(boot)), 
+            replace_sampling, static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
             static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
     }    
@@ -1354,7 +1350,6 @@ Rcpp::List RcppPCops(
                 res = pc::patcaus::patcaus(
                     Mx, My, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
                     static_cast<size_t>(std::abs(threads)), 
                     false, na_comp);
@@ -1383,7 +1378,6 @@ Rcpp::List RcppPCops(
                 res = pc::patcaus::patcaus(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted,
                     static_cast<size_t>(std::abs(threads)), 
                     false, na_comp);
@@ -1442,8 +1436,7 @@ Rcpp::List RcppPCops(
                 // --- Full data: no slicing needed ---
                 res = pc::patcaus::patcaus(
                     Mx, My, lib_std, pred_std, ki,
-                    static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
+                    static_cast<size_t>(std::abs(zero_tolerance)),    
                     dist_metric, relative, weighted, 1, 
                     false, na_comp);
             }
@@ -1471,7 +1464,6 @@ Rcpp::List RcppPCops(
                 res = pc::patcaus::patcaus(
                     Mx_sub, My_sub, lib_std, pred_std, ki,
                     static_cast<size_t>(std::abs(zero_tolerance)),
-                    static_cast<size_t>(std::abs(h)),
                     dist_metric, relative, weighted, 1, 
                     false, na_comp);
             }
