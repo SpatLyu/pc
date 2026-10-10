@@ -151,12 +151,12 @@ Pattern Causality
 }
 \examples{
 crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
-p1 = pc::pc(crash, 1, 2, E = 8, k = 8, threads = 1)
+p1 = pc::pc(crash, 1, 2, E = 3, k = 7, threads = 1)
 print(p1)
 plot(p1)
 
 # convergence diagnostics
-p2 = pc::pc(crash, 1, 2, libsizes = seq(10,172,40), E = 8, k = 8, threads = 1)
+p2 = pc::pc(crash, 1, 2, libsizes = seq(10,172,40), E = 3, k = 7, threads = 1)
 print(p2)
 plot(p2)
 
