@@ -103,8 +103,7 @@ namespace projection
       // Define per-prediction computation (single index)
       auto predict_fn = [&](size_t pi) {
         size_t p = pred_indices[pi];
-        if (p + h >= n_obs) return;
-
+        
         std::vector<double> distances;
         std::vector<size_t> valid_libs;
         distances.reserve(lib_indices.size());

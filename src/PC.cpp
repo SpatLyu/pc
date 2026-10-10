@@ -798,7 +798,7 @@ Rcpp::List RcppPCboot(
             Mx_sub, My_sub, valid_libsizes, lib_std, pred_std, 
             static_cast<size_t>(std::abs(num_neighbors)),
             static_cast<size_t>(std::abs(zero_tolerance)),
-            dist_metric, tatic_cast<size_t>(std::abs(boot)), 
+            dist_metric, static_cast<size_t>(std::abs(boot)), 
             replace_sampling, static_cast<unsigned long long>(std::abs(seed)),
             relative, weighted, static_cast<size_t>(std::abs(threads)),
             static_cast<size_t>(std::abs(parallel_level)), verbose, na_comp);
