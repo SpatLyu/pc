@@ -1140,7 +1140,7 @@ Rcpp::List RcppPCops(
     {
         for (size_t kk : ks)
         {   
-            if (kk < ee) continue;
+            if (kk < ee + 1) continue;
 
             for (size_t tt : taus)
                 unique_EkTau.emplace_back(ee, kk, tt);
