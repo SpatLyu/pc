@@ -12,6 +12,10 @@
 
 * Euclidean/Manhattan distances now automatically compensate for dimensions skipped due to `NA/NaN`, aligned with base R `dist()` function (#79).
 
+### bug fixes
+
+* Fix incorrect prediction horizon parameter in the time series pattern causality implementation (#80).
+
 # pc 0.2
 
 ### new
