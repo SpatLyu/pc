@@ -12,8 +12,8 @@
 // Wrapper function to perform pattern causality analysis
 // [[Rcpp::export(rng = false)]]
 Rcpp::List RcppPC(
-    const Rcpp::NumericVector& target,
     const Rcpp::NumericVector& source,
+    const Rcpp::NumericVector& target,
     const Rcpp::IntegerVector& lib,
     const Rcpp::IntegerVector& pred,
     const Rcpp::IntegerVector& E,
@@ -31,9 +31,9 @@ Rcpp::List RcppPC(
     bool na_comp = true)
 {
     // --- Input Conversion and Validation ---
-    std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
     std::vector<double> sg = Rcpp::as<std::vector<double>>(source);
-    const size_t n_obs = tg.size();
+    std::vector<double> tg = Rcpp::as<std::vector<double>>(target);
+    const size_t n_obs = sg.size();
 
     // Convert library indices (R 1-based → C++ 0-based)
     std::vector<size_t> lib_std = Rcpp::as<std::vector<size_t>>(lib);
