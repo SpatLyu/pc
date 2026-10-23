@@ -55,12 +55,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // RcppPC
-Rcpp::List RcppPC(const Rcpp::NumericVector& target, const Rcpp::NumericVector& source, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, int style, int num_neighbors, int zero_tolerance, const std::string& dist_metric, bool relative, bool weighted, int threads, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
-RcppExport SEXP _pc_RcppPC(SEXP targetSEXP, SEXP sourceSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP styleSEXP, SEXP num_neighborsSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
+Rcpp::List RcppPC(const Rcpp::NumericVector& source, const Rcpp::NumericVector& target, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, int style, int num_neighbors, int zero_tolerance, const std::string& dist_metric, bool relative, bool weighted, int threads, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
+RcppExport SEXP _pc_RcppPC(SEXP sourceSEXP, SEXP targetSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP styleSEXP, SEXP num_neighborsSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type source(sourceSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type lib(libSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type pred(predSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type E(ESEXP);
@@ -76,17 +76,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type nb(nbSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type nrows(nrowsSEXP);
     Rcpp::traits::input_parameter< bool >::type na_comp(na_compSEXP);
-    rcpp_result_gen = Rcpp::wrap(RcppPC(target, source, lib, pred, E, tau, style, num_neighbors, zero_tolerance, dist_metric, relative, weighted, threads, h, nb, nrows, na_comp));
+    rcpp_result_gen = Rcpp::wrap(RcppPC(source, target, lib, pred, E, tau, style, num_neighbors, zero_tolerance, dist_metric, relative, weighted, threads, h, nb, nrows, na_comp));
     return rcpp_result_gen;
 END_RCPP
 }
 // RcppPCboot
-Rcpp::List RcppPCboot(const Rcpp::NumericVector& target, const Rcpp::NumericVector& source, const Rcpp::IntegerVector& libsizes, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, int style, int num_neighbors, int zero_tolerance, const std::string& dist_metric, int boot, bool replace_sampling, int seed, bool relative, bool weighted, int threads, int parallel_level, bool verbose, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
-RcppExport SEXP _pc_RcppPCboot(SEXP targetSEXP, SEXP sourceSEXP, SEXP libsizesSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP styleSEXP, SEXP num_neighborsSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP bootSEXP, SEXP replace_samplingSEXP, SEXP seedSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP parallel_levelSEXP, SEXP verboseSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
+Rcpp::List RcppPCboot(const Rcpp::NumericVector& source, const Rcpp::NumericVector& target, const Rcpp::IntegerVector& libsizes, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, int style, int num_neighbors, int zero_tolerance, const std::string& dist_metric, int boot, bool replace_sampling, int seed, bool relative, bool weighted, int threads, int parallel_level, bool verbose, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
+RcppExport SEXP _pc_RcppPCboot(SEXP sourceSEXP, SEXP targetSEXP, SEXP libsizesSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP styleSEXP, SEXP num_neighborsSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP bootSEXP, SEXP replace_samplingSEXP, SEXP seedSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP parallel_levelSEXP, SEXP verboseSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type source(sourceSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type libsizes(libsizesSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type lib(libSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type pred(predSEXP);
@@ -108,17 +108,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type nb(nbSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type nrows(nrowsSEXP);
     Rcpp::traits::input_parameter< bool >::type na_comp(na_compSEXP);
-    rcpp_result_gen = Rcpp::wrap(RcppPCboot(target, source, libsizes, lib, pred, E, tau, style, num_neighbors, zero_tolerance, dist_metric, boot, replace_sampling, seed, relative, weighted, threads, parallel_level, verbose, h, nb, nrows, na_comp));
+    rcpp_result_gen = Rcpp::wrap(RcppPCboot(source, target, libsizes, lib, pred, E, tau, style, num_neighbors, zero_tolerance, dist_metric, boot, replace_sampling, seed, relative, weighted, threads, parallel_level, verbose, h, nb, nrows, na_comp));
     return rcpp_result_gen;
 END_RCPP
 }
 // RcppPCops
-Rcpp::List RcppPCops(const Rcpp::NumericVector& target, const Rcpp::NumericVector& source, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, const Rcpp::IntegerVector& k, const std::string& maximize, int style, int zero_tolerance, const std::string& dist_metric, bool relative, bool weighted, int threads, int parallel_level, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
-RcppExport SEXP _pc_RcppPCops(SEXP targetSEXP, SEXP sourceSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP kSEXP, SEXP maximizeSEXP, SEXP styleSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP parallel_levelSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
+Rcpp::List RcppPCops(const Rcpp::NumericVector& source, const Rcpp::NumericVector& target, const Rcpp::IntegerVector& lib, const Rcpp::IntegerVector& pred, const Rcpp::IntegerVector& E, const Rcpp::IntegerVector& tau, const Rcpp::IntegerVector& k, const std::string& maximize, int style, int zero_tolerance, const std::string& dist_metric, bool relative, bool weighted, int threads, int parallel_level, int h, Rcpp::Nullable<Rcpp::List> nb, Rcpp::Nullable<int> nrows, bool na_comp);
+RcppExport SEXP _pc_RcppPCops(SEXP sourceSEXP, SEXP targetSEXP, SEXP libSEXP, SEXP predSEXP, SEXP ESEXP, SEXP tauSEXP, SEXP kSEXP, SEXP maximizeSEXP, SEXP styleSEXP, SEXP zero_toleranceSEXP, SEXP dist_metricSEXP, SEXP relativeSEXP, SEXP weightedSEXP, SEXP threadsSEXP, SEXP parallel_levelSEXP, SEXP hSEXP, SEXP nbSEXP, SEXP nrowsSEXP, SEXP na_compSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type source(sourceSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type lib(libSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type pred(predSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type E(ESEXP);
@@ -136,7 +136,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type nb(nbSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type nrows(nrowsSEXP);
     Rcpp::traits::input_parameter< bool >::type na_comp(na_compSEXP);
-    rcpp_result_gen = Rcpp::wrap(RcppPCops(target, source, lib, pred, E, tau, k, maximize, style, zero_tolerance, dist_metric, relative, weighted, threads, parallel_level, h, nb, nrows, na_comp));
+    rcpp_result_gen = Rcpp::wrap(RcppPCops(source, target, lib, pred, E, tau, k, maximize, style, zero_tolerance, dist_metric, relative, weighted, threads, parallel_level, h, nb, nrows, na_comp));
     return rcpp_result_gen;
 END_RCPP
 }
