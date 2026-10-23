@@ -1,4 +1,4 @@
-.pc_ts = \(data, target, source, libsizes = NULL, E = 3, k = E, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_ts = \(data, source, target, libsizes = NULL, E = 3, k = E, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
            replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k),
            relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, h = 0, ...) {
   dist.metric = match.arg(dist.metric)
@@ -16,7 +16,7 @@
   }
 }
 
-.pc_lattice = \(data, target, source, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_lattice = \(data, source, target, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
                 replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k), 
                 relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, detrend = FALSE, nb = NULL, ...) {
   if (is.null(nb)) nb = sdsfun::spdep_nb(data)
@@ -35,7 +35,7 @@
   }
 }
 
-.pc_grid = \(data, target, source, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
+.pc_grid = \(data, source, target, libsizes = NULL, E = 3, k = E+1, tau = 1, style = 1, lib = NULL, pred = NULL, boot = 99,
              replace = FALSE, seed = 42L, dist.metric = c("euclidean", "manhattan", "maximum"), zero.tolerance = max(k), 
              relative = TRUE, weighted = TRUE, threads = length(libsizes), higher.parallel = TRUE, verbose = TRUE, detrend = FALSE, ...) {
   dist.metric = match.arg(dist.metric)
