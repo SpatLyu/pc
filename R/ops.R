@@ -8,7 +8,7 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance,
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance,
                    dist.metric, relative, weighted, threads, higher.parallel, h, NULL, NULL))
 }
 
@@ -23,7 +23,7 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance, 
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance, 
                    dist.metric, relative, weighted, threads, higher.parallel, 0, nb, NULL))
 }
 
@@ -37,7 +37,7 @@
   if (is.null(lib)) lib = which(!(is.na(tv) | is.na(sv)))
   if (is.null(pred)) pred = lib
 
-  return(RcppPCops(tv, sv, lib, pred, E, tau, k, maximize, style, zero.tolerance, dist.metric, 
+  return(RcppPCops(sv, tv, lib, pred, E, tau, k, maximize, style, zero.tolerance, dist.metric, 
                    relative, weighted, threads, higher.parallel, 0, NULL, terra::nrow(data)))
 }
 
