@@ -584,6 +584,12 @@ namespace symdync
                         norm_ignore_nan(pred_SMy[t]) /
                         (norm_ignore_nan(SMx[t]) + 1e-6))
                     : 1.0;
+
+                strength = weighted
+                    ? std::erf(
+                        norm_ignore_nan(pred_SMy[t]) /
+                        (norm_ignore_nan(SMy[t]) + 1e-6))
+                    : 1.0;                    
             }
 
             /* --- index lookup --- */
