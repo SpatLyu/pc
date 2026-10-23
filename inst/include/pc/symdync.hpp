@@ -577,7 +577,8 @@ namespace symdync
             /* --- strength --- */
             double strength = 0.0;
             if (causality_exit)
-            {
+            {   
+                // Evaluates the predictive power of x over y
                 strength = weighted
                     ? std::erf(
                         norm_ignore_nan(pred_SMy[t]) /
