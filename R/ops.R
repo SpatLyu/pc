@@ -58,7 +58,7 @@
 #'
 #' @examples
 #' crash = sf::read_sf(system.file("case/crash.gpkg", package = "pc"))
-#' pc::ops(crash, 1, 2, E = 3:10, maximize = "positive", threads = 1)
+#' pc::ops(crash, 2, 1, E = 3:10, maximize = "positive", threads = 1)
 #'
 methods::setMethod("ops", "data.frame", .ops_ts)
 
