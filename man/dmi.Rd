@@ -42,6 +42,9 @@ A vector.
 \description{
 Delayed Mutual Information
 }
+\note{
+\code{dmi} is only supported for time-series inputs.
+}
 \examples{
 abun = readr::read_csv(system.file("case/abundance.csv", package = "pc"))
 pc::dmi(abun, 2)
