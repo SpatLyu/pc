@@ -584,7 +584,8 @@ namespace symdync
                         norm_ignore_nan(pred_SMy[t]) /
                         (norm_ignore_nan(SMx[t]) + 1e-6))
                     : 1.0;
-
+                
+                // Evaluates the cross-mapping fidelity from x to y (x xmap y)
                 strength = weighted
                     ? std::erf(
                         norm_ignore_nan(pred_SMy[t]) /
