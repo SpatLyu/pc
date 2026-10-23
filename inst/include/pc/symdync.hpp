@@ -578,19 +578,19 @@ namespace symdync
             double strength = 0.0;
             if (causality_exit)
             {   
-                // Evaluates the predictive power of x over y
+                // Evaluates the predictive power of x over y (x predicts y)
                 strength = weighted
                     ? std::erf(
                         norm_ignore_nan(pred_SMy[t]) /
                         (norm_ignore_nan(SMx[t]) + 1e-6))
                     : 1.0;
                 
-                // Evaluates the cross-mapping fidelity from x to y (x xmap y)
-                strength = weighted
-                    ? std::erf(
-                        norm_ignore_nan(pred_SMy[t]) /
-                        (norm_ignore_nan(SMy[t]) + 1e-6))
-                    : 1.0;                    
+                // // Evaluates the cross-mapping fidelity from x to y (x xmap y)
+                // strength = weighted
+                //     ? std::erf(
+                //         norm_ignore_nan(pred_SMy[t]) /
+                //         (norm_ignore_nan(SMy[t]) + 1e-6))
+                //     : 1.0;                    
             }
 
             /* --- index lookup --- */
