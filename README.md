@@ -18,7 +18,7 @@
 
 ***P**attern **C**ausality Analysis*
 
-*pc* is an R package for pattern-based causality analysis in both time series and spatial cross-sectional data. It uses phase state reconstruction and symbolic pattern projection to detect causal interactions from temporal dynamics and spatial variations. Built on a high-performance C++ backend with a lightweight R interface, *pc* provides efficient and flexible tools for data-driven causality analysis.
+*pc* is an R package for pattern-based causality analysis in both time series and spatial cross-sectional data. It uses phase state reconstruction and symbolic pattern projection to unveil causal interactions from temporal dynamics and spatial variations. Built on a high-performance C++ backend with a lightweight R interface, *pc* provides efficient and flexible tools for data-driven causality analysis.
 
 > *Refer to the package documentation <https://stscl.github.io/pc/> for more detailed information.*
 
