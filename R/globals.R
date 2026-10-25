@@ -1,1 +1,0 @@
-utils::globalVariables(c("libsizes", "strength", "type", "q50"))
