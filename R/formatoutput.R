@@ -23,11 +23,11 @@ plot.pc_single = \(x, family = "serif", ...){
   causdf = x$summary
   
   ggplot2::ggplot(causdf, 
-                  ggplot2::aes(x = ggplot2::.data[["type"]], 
-                               y = ggplot2::.data[["strength"]], 
-                               fill = ggplot2::.data[["type"]])) +
+                  ggplot2::aes(x = .data[["type"]], 
+                               y = .data[["strength"]], 
+                               fill = .data[["type"]])) +
     ggplot2::geom_col() +
-    ggplot2::geom_text(ggplot2::aes(label = round(ggplot2::.data[["strength"]], 3)), 
+    ggplot2::geom_text(ggplot2::aes(label = round(.data[["strength"]], 3)), 
                        vjust = -0.5) +
     ggplot2::scale_y_continuous(
       limits = c(0, max(causdf$strength) * 1.1),
@@ -57,9 +57,9 @@ plot.pc_boot = \(x, family = "serif",
   if(is.null(ylimits)) ylimits = c(-0.01, max(causdf$q50) + 0.1)
 
   ggplot2::ggplot(causdf, 
-                  ggplot2::aes(x = ggplot2::.data[["libsizes"]], 
-                               y = ggplot2::.data[["q50"]], 
-                               color = ggplot2::.data[["type"]])) +
+                  ggplot2::aes(x = .data[["libsizes"]], 
+                               y = .data[["q50"]], 
+                               color = .data[["type"]])) +
     ggplot2::geom_line(linewidth = 1.25) +
     ggplot2::scale_color_manual(name = NULL,
                                 values = c("dark" = "#6A0DAD", 
